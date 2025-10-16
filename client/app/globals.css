@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 250 249 246;
+    --foreground: 45 62 80;
+    --card: 255 255 255;
+    --card-foreground: 45 62 80;
+    --popover: 255 255 255;
+    --popover-foreground: 45 62 80;
+    --primary: 45 62 80;
+    --primary-foreground: 255 255 255;
+    --secondary: 211 84 0;
+    --secondary-foreground: 255 255 255;
+    --muted: 250 249 246;
+    --muted-foreground: 115 115 115;
+    --accent: 227 119 27;
+    --accent-foreground: 255 255 255;
+    --destructive: 239 68 68;
+    --destructive-foreground: 255 255 255;
+    --border: 229 229 229;
+    --input: 229 229 229;
+    --ring: 147 197 253;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 33 33 33;
+    --foreground: 255 255 255;
+    --card: 33 33 33;
+    --card-foreground: 255 255 255;
+    --popover: 33 33 33;
+    --popover-foreground: 255 255 255;
+    --primary: 255 255 255;
+    --primary-foreground: 33 33 33;
+    --secondary: 66 66 66;
+    --secondary-foreground: 255 255 255;
+    --muted: 66 66 66;
+    --muted-foreground: 163 163 163;
+    --accent: 66 66 66;
+    --accent-foreground: 255 255 255;
+    --destructive: 127 29 29;
+    --destructive-foreground: 255 255 255;
+    --border: 66 66 66;
+    --input: 66 66 66;
+    --ring: 163 163 163;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-color: #FAF9F6;
+    color: #2D3E50;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-raleway);
+  }
+  .font-heading {
+    font-family: var(--font-montserrat);
+  }
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #2D3E50 0%, #1A252F 100%);
+}
+
+.card-hover {
+  transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(45, 62, 80, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #D35400 0%, #E67E22 100%);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #B8450A 0%, #D35400 100%);
+  transform: translateY(-1px);
+}
+
+.category-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  border: 1px solid #F0EBE3;
+}
+
+.category-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(45, 62, 80, 0.08);
+}
+
+.product-card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid #F0EBE3;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 12px rgba(45, 62, 80, 0.08);
+}
+
+.filter-section {
+  background: #FFFFFF;
+  border-radius: 8px;
+  border: 1px solid #F0EBE3;
+}
+
+.price-badge {
+  background: linear-gradient(135deg, #D35400 0%, #E67E22 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.discount-badge {
+  background: #E67E22;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
