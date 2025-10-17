@@ -23,9 +23,13 @@ const nextConfig = {
   // Experimental features to improve build
   experimental: {
     serverComponentsExternalPackages: [],
+    // Disable server actions to prevent infinite requests
+    serverActions: false,
   },
   // Disable source maps in production to reduce build size
   productionBrowserSourceMaps: false,
+  // Disable React strict mode to prevent double rendering
+  reactStrictMode: false,
 };
 
 module.exports = nextConfig;

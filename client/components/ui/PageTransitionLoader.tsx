@@ -1,21 +1,21 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useNavigationLoading } from '@/hooks/useNavigationLoading';
 
 const PageTransitionLoader = () => {
   const isLoading = useNavigationLoading();
 
+  if (!isLoading) return null;
+
   return (
-    <AnimatePresence mode="wait">
-      {isLoading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-cream-50 to-white"
-        >
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-cream-50 to-white"
+    >
           <div className="relative w-32 h-32">
             {/* Mirror effect container */}
             <div className="absolute inset-0 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-indigo-700/20 backdrop-blur-sm border border-primary/30 shadow-xl">
@@ -104,8 +104,6 @@ const PageTransitionLoader = () => {
             </motion.div>
           </div>
         </motion.div>
-      )}
-    </AnimatePresence>
   );
 };
 

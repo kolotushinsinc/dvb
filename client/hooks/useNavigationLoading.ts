@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 export const useNavigationLoading = () => {
   const [isLoading, setIsLoading] = useState(false);
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const isMounted = useRef(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isFirstLoad = useRef(true);
+  const previousPathname = useRef(pathname);
 
   useEffect(() => {
     // For Next.js route changes
@@ -29,8 +29,8 @@ export const useNavigationLoading = () => {
 
   // Handle route changes
   useEffect(() => {
-    // Skip first load
-    if (!isFirstLoad.current && isMounted.current) {
+    // Skip first load and only trigger on actual pathname changes
+    if (!isFirstLoad.current && isMounted.current && previousPathname.current !== pathname) {
       // Clear any existing timeout
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
@@ -45,13 +45,16 @@ export const useNavigationLoading = () => {
         }
       }, 300); // Reduced minimum loading time for faster experience
 
+      // Update previous pathname
+      previousPathname.current = pathname;
+
       return () => {
         if (loadingTimeoutRef.current) {
           clearTimeout(loadingTimeoutRef.current);
         }
       };
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   return isLoading;
 };
