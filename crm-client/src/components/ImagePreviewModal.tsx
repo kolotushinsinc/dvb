@@ -95,7 +95,7 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ image, chi
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = image.url;
+    link.href = image.url.replace('https://api.dvberry.ru', '');
     link.download = image.originalName;
     document.body.appendChild(link);
     link.click();
@@ -212,7 +212,7 @@ export const ImagePreviewModal: React.FC<ImagePreviewModalProps> = ({ image, chi
             style={{ cursor: isDragging ? 'grabbing' : scale > 1 ? 'grab' : 'default' }}
           >
             <img
-              src={image.url}
+              src={image.url.replace('https://api.dvberry.ru', '')}
               alt={image.originalName}
               className="max-w-full max-h-full object-contain select-none transition-transform duration-200 will-change-transform"
               style={{

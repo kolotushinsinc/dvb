@@ -103,7 +103,7 @@ export const MainImageUpload: React.FC<MainImageUploadProps> = ({ image, onImage
         <div className="relative group">
           <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
             <img
-              src={image.url}
+              src={image.url.replace('https://api.dvberry.ru', '')}
               alt="Основное изображение"
               className="w-full h-full object-cover"
             />
