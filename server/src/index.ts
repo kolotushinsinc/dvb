@@ -64,9 +64,15 @@ app.use('/api/products', rateLimit({
 
 app.use('/api', limiter);
 
-// Allow requests from specific origins
+// Allow requests from any origin without restrictions
 app.use(cors({
-  origin: ['https://crm.dvberry.ru', 'http://localhost:3001'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'X-HTTP-Method-Override', 'X-CSRF-Token'],
@@ -77,7 +83,13 @@ app.use(cors({
 
 // Apply CORS to static file routes specifically
 app.use('/uploads', cors({
-  origin: ['https://crm.dvberry.ru', 'http://localhost:3001'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins for static files
+    return callback(null, true);
+  },
   credentials: false, // Don't require credentials for static files
   methods: ['GET', 'HEAD', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
@@ -88,7 +100,13 @@ app.use('/uploads', cors({
 
 // Add a pre-flight middleware for all routes
 app.options('*', cors({
-  origin: ['https://crm.dvberry.ru', 'http://localhost:3001'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'X-HTTP-Method-Override', 'X-CSRF-Token'],
@@ -99,13 +117,8 @@ app.options('*', cors({
 
 // Add headers middleware to ensure CORS headers are set for all responses
 app.use((req, res, next) => {
-  const allowedOrigins = ['https://crm.dvberry.ru', 'http://localhost:3001'];
-  const origin = req.headers.origin;
-  
   // Set CORS headers for all responses
-  if (allowedOrigins.includes(origin as string)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept, X-HTTP-Method-Override, X-CSRF-Token');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -126,13 +139,8 @@ app.use(cookieParser());
 
 // Static files with custom headers for CORS
 app.use('/uploads', (req, res, next) => {
-  const allowedOrigins = ['https://crm.dvberry.ru', 'http://localhost:3001'];
-  const origin = req.headers.origin;
-  
   // Set CORS headers for static files
-  if (allowedOrigins.includes(origin as string)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
   
@@ -146,22 +154,13 @@ app.use('/uploads', (req, res, next) => {
   setHeaders: (res, path) => {
     // Set cache control headers for images
     res.header('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
-    const allowedOrigins = ['https://crm.dvberry.ru', 'http://localhost:3001'];
-    const origin = res.req.headers.origin;
-    if (allowedOrigins.includes(origin as string)) {
-      res.header('Access-Control-Allow-Origin', origin);
-    }
+    res.header('Access-Control-Allow-Origin', '*');
   }
 }));
 
 app.use('/uploads/thumbnails', (req, res, next) => {
-  const allowedOrigins = ['https://crm.dvberry.ru', 'http://localhost:3001'];
-  const origin = req.headers.origin;
-  
   // Set CORS headers for static files
-  if (allowedOrigins.includes(origin as string)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
+  res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
   
@@ -175,11 +174,7 @@ app.use('/uploads/thumbnails', (req, res, next) => {
   setHeaders: (res, path) => {
     // Set cache control headers for thumbnails
     res.header('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
-    const allowedOrigins = ['https://crm.dvberry.ru', 'http://localhost:3001'];
-    const origin = res.req.headers.origin;
-    if (allowedOrigins.includes(origin as string)) {
-      res.header('Access-Control-Allow-Origin', origin);
-    }
+    res.header('Access-Control-Allow-Origin', '*');
   }
 }));
 
