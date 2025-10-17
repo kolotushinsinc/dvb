@@ -36,6 +36,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const parsedUser = JSON.parse(userData);
         if (parsedUser) {
           setUser(parsedUser);
+          // Verify token is still valid by fetching profile
+          authApi.getProfile()
+            .then(updatedUser => {
+              setUser(updatedUser);
+              localStorage.setItem('crm_user', JSON.stringify(updatedUser));
+            })
+            .catch(error => {
+              console.error('Error fetching profile:', error);
+              localStorage.removeItem('crm_token');
+              localStorage.removeItem('crm_user');
+              setUser(null);
+            });
         } else {
           localStorage.removeItem('crm_token');
           localStorage.removeItem('crm_user');

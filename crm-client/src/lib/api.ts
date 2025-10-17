@@ -2,7 +2,7 @@ import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'ax
 import { User, Product, Category, Order, DashboardStats } from '@/types';
 
 const api = axios.create({
-  baseURL: 'https://api.dvberry.ru/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://api.dvberry.ru/api',
   timeout: 10000,
 });
 
@@ -36,7 +36,7 @@ export const authApi = {
   },
   
   getProfile: async (): Promise<User> => {
-    const response = await api.get('/auth/me');
+    const response = await api.get('/auth/profile');
     return response.data.data?.user || response.data;
   },
   
