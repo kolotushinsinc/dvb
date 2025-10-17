@@ -118,6 +118,11 @@ app.options('*', (req, res) => {
 
 // Add headers middleware to ensure CORS headers are set for all responses
 app.use((req, res, next) => {
+  // Skip if CORS headers are already set by the cors middleware or OPTIONS handler
+  if (res.getHeader('Access-Control-Allow-Origin')) {
+    return next();
+  }
+  
   const origin = req.headers.origin;
   const allowedOrigins = [
     'https://dvberry.ru',
