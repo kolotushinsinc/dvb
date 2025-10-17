@@ -32,9 +32,10 @@ const Header = () => {
     const checkAuthStatus = async () => {
       try {
         // This is a simple check - in a real app, you might have a more robust auth check
-        const response = await api.auth.getProfile().catch(() => null);
-        setIsLoggedIn(!!response);
+        const response = await api.auth.getProfile();
+        setIsLoggedIn(!!response && response.success);
       } catch (error) {
+        // If we get a 404 or any other error, user is not logged in
         setIsLoggedIn(false);
       }
     };

@@ -305,4 +305,25 @@ router.post('/logout', (req: Request, res: Response) => {
   });
 });
 
+// Get current user profile (alternative endpoint)
+router.get('/profile', auth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = await User.findById(req.user?.userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        error: 'User not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: { user }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

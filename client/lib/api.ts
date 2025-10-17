@@ -35,7 +35,20 @@ async function fetchApi(endpoint: string, options?: RequestInit) {
       }
 
       if (!response.ok) {
-        const error = await response.json();
+        // For auth endpoints, 401/404 might mean user is not authenticated
+        if (endpoint.includes('/auth/') && (response.status === 401 || response.status === 404)) {
+          const error = await response.json().catch(() => ({}));
+          console.log('Auth endpoint returned', response.status, '- user likely not authenticated');
+          throw new Error('Not authenticated');
+        }
+        
+        let error;
+        try {
+          error = await response.json();
+        } catch (e) {
+          // If response is not JSON
+          error = { message: `HTTP error! status: ${response.status}` };
+        }
         console.error('API Error:', error);
         throw new Error(error.message || 'API request failed');
       }

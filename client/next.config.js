@@ -5,9 +5,12 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  images: { unoptimized: true },
+  images: {
+    unoptimized: true,
+    domains: ['api.dvberry.ru'],
+  },
   // Add trailing slash for consistent routing
-  trailingSlash: true,
+  trailingSlash: false,
   // Add rewrites to proxy image requests to avoid CORS issues
   async rewrites() {
     return [
@@ -17,6 +20,12 @@ const nextConfig = {
       },
     ];
   },
+  // Experimental features to improve build
+  experimental: {
+    serverComponentsExternalPackages: [],
+  },
+  // Disable source maps in production to reduce build size
+  productionBrowserSourceMaps: false,
 };
 
 module.exports = nextConfig;

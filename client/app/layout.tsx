@@ -23,9 +23,7 @@ export default function RootLayout({
     <html lang="ru">
       <body className={`${inter.variable} ${raleway.variable} ${montserrat.variable} font-sans`}>
         <ClientProviders>
-          <SmoothTransition>
-            {children}
-          </SmoothTransition>
+          {children}
           <PageTransitionLoader />
         </ClientProviders>
       </body>

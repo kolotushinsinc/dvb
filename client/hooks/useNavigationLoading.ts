@@ -16,7 +16,6 @@ export const useNavigationLoading = () => {
     if (typeof window !== 'undefined') {
       // Handle initial load - don't show loader on first load
       isFirstLoad.current = false;
-      setIsLoading(false);
       
       // Cleanup
       return () => {
