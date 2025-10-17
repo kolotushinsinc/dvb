@@ -64,9 +64,27 @@ app.use('/api/products', rateLimit({
 
 app.use('/api', limiter);
 
-// Simple and permissive CORS configuration
+// CORS configuration that works with credentials
 app.use(cors({
-  origin: '*',
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    
+    // Allow specific origins
+    const allowedOrigins = [
+      'https://dvberry.ru',
+      'https://crm.dvberry.ru',
+      'http://localhost:3000',
+      'http://localhost:3001'
+    ];
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      console.log('Origin not allowed by CORS:', origin);
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'X-HTTP-Method-Override', 'X-CSRF-Token'],
@@ -77,7 +95,20 @@ app.use(cors({
 
 // Handle preflight requests for all routes
 app.options('*', (req, res) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://dvberry.ru',
+    'https://crm.dvberry.ru',
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ];
+  
+  if (origin && allowedOrigins.indexOf(origin) !== -1) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', 'https://dvberry.ru');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept, X-HTTP-Method-Override, X-CSRF-Token');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -87,8 +118,20 @@ app.options('*', (req, res) => {
 
 // Add headers middleware to ensure CORS headers are set for all responses
 app.use((req, res, next) => {
-  // Set CORS headers for all responses
-  res.header('Access-Control-Allow-Origin', '*');
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://dvberry.ru',
+    'https://crm.dvberry.ru',
+    'http://localhost:3000',
+    'http://localhost:3001'
+  ];
+  
+  if (origin && allowedOrigins.indexOf(origin) !== -1) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', 'https://dvberry.ru');
+  }
+  
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept, X-HTTP-Method-Override, X-CSRF-Token');
   res.header('Access-Control-Allow-Credentials', 'true');
