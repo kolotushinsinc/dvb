@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
@@ -64,130 +63,26 @@ app.use('/api/products', rateLimit({
 
 app.use('/api', limiter);
 
-// CORS configuration that works with credentials
-app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    
-    // Allow specific origins
-    const allowedOrigins = [
-      'https://dvberry.ru',
-      'https://crm.dvberry.ru',
-      'http://localhost:3000',
-      'http://localhost:3001'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    } else {
-      console.log('Origin not allowed by CORS:', origin);
-      return callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'X-HTTP-Method-Override', 'X-CSRF-Token'],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
-
-// Handle preflight requests for all routes
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  const allowedOrigins = [
-    'https://dvberry.ru',
-    'https://crm.dvberry.ru',
-    'http://localhost:3000',
-    'http://localhost:3001'
-  ];
-  
-  if (origin && allowedOrigins.indexOf(origin) !== -1) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', 'https://dvberry.ru');
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept, X-HTTP-Method-Override, X-CSRF-Token');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Expose-Headers', 'Content-Range, X-Content-Range');
-  res.status(204).end();
-});
-
-// Add headers middleware to ensure CORS headers are set for all responses
-app.use((req, res, next) => {
-  // Skip if CORS headers are already set by the cors middleware or OPTIONS handler
-  if (res.getHeader('Access-Control-Allow-Origin')) {
-    return next();
-  }
-  
-  const origin = req.headers.origin;
-  const allowedOrigins = [
-    'https://dvberry.ru',
-    'https://crm.dvberry.ru',
-    'http://localhost:3000',
-    'http://localhost:3001'
-  ];
-  
-  if (origin && allowedOrigins.indexOf(origin) !== -1) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', 'https://dvberry.ru');
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept, X-HTTP-Method-Override, X-CSRF-Token');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Expose-Headers', 'Content-Range, X-Content-Range');
-  
-  next();
-});
+// Note: CORS headers are now handled by nginx configuration
+// We don't need to set them here to avoid duplication
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// Static files with custom headers for CORS
-app.use('/uploads', (req, res, next) => {
-  // Set CORS headers for static files
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  
-  next();
-}, express.static(path.join(__dirname, '../uploads'), {
+// Static files - CORS headers are handled by nginx
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   setHeaders: (res, path) => {
     // Set cache control headers for images
     res.header('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
-    res.header('Access-Control-Allow-Origin', '*');
   }
 }));
 
-app.use('/uploads/thumbnails', (req, res, next) => {
-  // Set CORS headers for static files
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
-  
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  
-  next();
-}, express.static(path.join(__dirname, '../uploads/thumbnails'), {
+app.use('/uploads/thumbnails', express.static(path.join(__dirname, '../uploads/thumbnails'), {
   setHeaders: (res, path) => {
     // Set cache control headers for thumbnails
     res.header('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
-    res.header('Access-Control-Allow-Origin', '*');
   }
 }));
 
