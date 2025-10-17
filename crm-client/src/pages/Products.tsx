@@ -528,7 +528,7 @@ export const Products = () => {
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center text-4xl">
                     {product.mainImage ? (
-                      <img className="w-full h-full rounded-2xl object-cover" src={product.mainImage.replace('https://api.dvberry.ru', '')} alt="" />
+                      <img className="w-full h-full rounded-2xl object-cover" src={product.mainImage} alt="" />
                     ) : (
                       <Package className="w-8 h-8 text-slate-400" />
                     )}

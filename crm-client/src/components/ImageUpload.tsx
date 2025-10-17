@@ -252,7 +252,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                     <ImagePreviewModal image={image}>
                       <div className="w-full h-full cursor-zoom-in">
                         <img
-                          src={image.url.replace('https://api.dvberry.ru', '')}
+                          src={image.url}
                           alt={image.originalName}
                           className="w-full h-full object-cover"
                         />
