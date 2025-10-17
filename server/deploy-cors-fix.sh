@@ -8,10 +8,10 @@
 
 echo "Starting CORS fix deployment..."
 
-# Replace these with your actual server details
-SERVER_USER="your_username"
-SERVER_IP="your_server_ip"
-SERVER_PATH="/path/to/your/dvb/project"
+# Server details
+SERVER_USER="root"
+SERVER_IP="194.67.88.43"
+SERVER_PATH="/var/www/html/dvb"
 
 # Copy updated nginx configuration
 echo "Copying updated nginx configuration..."
@@ -23,10 +23,10 @@ scp -r server/src ${SERVER_USER}@${SERVER_IP}:${SERVER_PATH}/server/
 
 # Restart nginx
 echo "Restarting nginx..."
-ssh ${SERVER_USER}@${SERVER_IP} "sudo systemctl restart nginx"
+ssh ${SERVER_USER}@${SERVER_IP} "systemctl restart nginx"
 
-# Restart the Node.js application (adjust according to your process manager)
+# Restart the Node.js application
 echo "Restarting Node.js application..."
-ssh ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH}/server && pm2 restart dvb-api || npm start"
+ssh ${SERVER_USER}@${SERVER_IP} "cd ${SERVER_PATH}/server && pm2 restart all || pm2 start index.ts --name dvb-api"
 
 echo "CORS fix deployment completed!"

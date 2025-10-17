@@ -66,6 +66,18 @@ app.use('/api', limiter);
 // Note: CORS headers are now handled by nginx configuration
 // We don't need to set them here to avoid duplication
 
+// Middleware to remove any CORS headers that might be set by Express
+app.use((req, res, next) => {
+  // Remove any CORS headers that might be automatically set
+  res.removeHeader('Access-Control-Allow-Origin');
+  res.removeHeader('Access-Control-Allow-Methods');
+  res.removeHeader('Access-Control-Allow-Headers');
+  res.removeHeader('Access-Control-Allow-Credentials');
+  res.removeHeader('Access-Control-Expose-Headers');
+  res.removeHeader('Access-Control-Max-Age');
+  next();
+});
+
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -76,6 +88,11 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
   setHeaders: (res, path) => {
     // Set cache control headers for images
     res.header('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+    // Explicitly remove any CORS headers that might be set by Express
+    res.removeHeader('Access-Control-Allow-Origin');
+    res.removeHeader('Access-Control-Allow-Methods');
+    res.removeHeader('Access-Control-Allow-Headers');
+    res.removeHeader('Access-Control-Allow-Credentials');
   }
 }));
 
@@ -83,6 +100,11 @@ app.use('/uploads/thumbnails', express.static(path.join(__dirname, '../uploads/t
   setHeaders: (res, path) => {
     // Set cache control headers for thumbnails
     res.header('Cache-Control', 'public, max-age=86400'); // Cache for 1 day
+    // Explicitly remove any CORS headers that might be set by Express
+    res.removeHeader('Access-Control-Allow-Origin');
+    res.removeHeader('Access-Control-Allow-Methods');
+    res.removeHeader('Access-Control-Allow-Headers');
+    res.removeHeader('Access-Control-Allow-Credentials');
   }
 }));
 
