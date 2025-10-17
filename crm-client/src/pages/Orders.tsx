@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  ShoppingCart,
   Search,
   Filter,
   CheckCircle,
@@ -16,8 +15,7 @@ import { ordersApi } from '@/lib/api';
 import { Order } from '@/types';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CustomDialog, CustomDialogContent, CustomDialogHeader, CustomDialogTitle, CustomDialogDescription, CustomDialogFooter } from '@/components/ui/CustomDialog';
+import { CustomDialog, CustomDialogContent, CustomDialogHeader, CustomDialogTitle } from '@/components/ui/CustomDialog';
 import { Badge } from '@/components/ui/badge';
 
 const statusLabels = {
@@ -40,15 +38,6 @@ const statusIcons = {
   REFUNDED: XCircle,
 };
 
-const statusColors = {
-  PENDING: 'bg-amber-100 text-amber-700 border-amber-200',
-  CONFIRMED: 'bg-indigo-100 text-indigo-700 border-indigo-200',
-  PROCESSING: 'bg-blue-100 text-blue-700 border-blue-200',
-  SHIPPED: 'bg-purple-100 text-purple-700 border-purple-200',
-  DELIVERED: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  CANCELLED: 'bg-red-100 text-red-700 border-red-200',
-  REFUNDED: 'bg-rose-100 text-rose-700 border-rose-200',
-};
 
 export const Orders = () => {
   const [page, setPage] = useState(1);
@@ -340,8 +329,8 @@ export const Orders = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      {selectedOrder.items.map((item) => (
-                        <tr key={item._id}>
+                      {selectedOrder.items.map((item, index) => (
+                        <tr key={index}>
                           <td className="px-4 py-3 whitespace-nowrap text-sm text-slate-900">
                             {typeof item.product === 'object' ? item.product.name : 'Товар'}
                           </td>

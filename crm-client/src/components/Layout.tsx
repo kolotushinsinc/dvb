@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -32,7 +32,7 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
   const location = useLocation();
 
   return (

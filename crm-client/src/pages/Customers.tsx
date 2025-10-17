@@ -1,26 +1,19 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Users,
   Search,
   Filter,
   Mail,
   Phone,
-  MapPin,
   Calendar,
   Ban,
   CheckCircle,
-  Eye,
-  MoreVertical,
-  UserPlus,
-  ShoppingCart
+  UserPlus
 } from 'lucide-react';
-import { customersApi, authApi } from '@/lib/api';
+import { customersApi } from '@/lib/api';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CustomDialog, CustomDialogContent, CustomDialogHeader, CustomDialogTitle, CustomDialogDescription, CustomDialogFooter } from '@/components/ui/CustomDialog';
+import { CustomDialog, CustomDialogContent, CustomDialogHeader, CustomDialogTitle } from '@/components/ui/CustomDialog';
 import { toast } from 'sonner';
 
 export const Customers = () => {
@@ -103,10 +96,6 @@ export const Customers = () => {
     }
   };
 
-  const handleViewDetails = (customer: User) => {
-    setSelectedCustomer(customer);
-    setShowCustomerDetails(true);
-  };
 
   if (isLoading) {
     return (

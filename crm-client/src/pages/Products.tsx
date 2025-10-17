@@ -8,19 +8,16 @@ import {
   Filter,
   Package,
   X,
-  Upload,
   Eye,
   MoreVertical
 } from 'lucide-react';
-import { productsApi, categoriesApi, uploadApi } from '@/lib/api';
+import { productsApi, categoriesApi } from '@/lib/api';
 import { Product, Category } from '@/types';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { ColorSelector } from '@/components/ColorSelector';
 import { ProductAttributes } from '@/components/ProductAttributes';
-import { getColorByName } from '@/lib/colors';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { CustomDialog, CustomDialogContent, CustomDialogHeader, CustomDialogTitle, CustomDialogDescription, CustomDialogFooter } from '@/components/ui/CustomDialog';
+import { CustomDialog, CustomDialogContent, CustomDialogHeader, CustomDialogTitle, CustomDialogFooter } from '@/components/ui/CustomDialog';
 import { Badge } from '@/components/ui/badge';
 import { ImageUpload } from '@/components/ImageUpload';
 import { MainImageUpload } from '@/components/MainImageUpload';
@@ -34,7 +31,6 @@ export const Products = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [previewImage, setPreviewImage] = useState<any>(null);
 
   // Form states for creating a new product
   const [createFormData, setCreateFormData] = useState({
@@ -887,7 +883,7 @@ export const Products = () => {
                       value={variant.type}
                       onChange={(e) => {
                         const newVariants = [...createFormData.variants];
-                        newVariants[index].type = e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL';
+                        newVariants[index].type = e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL' | 'STYLE' | 'SEASON' | 'TECHNOLOGY';
                         handleCreateFormChange('variants', newVariants);
                       }}
                     >
@@ -944,7 +940,7 @@ export const Products = () => {
                   <select
                     className="rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     value={newVariant.type}
-                    onChange={(e) => setNewVariant({...newVariant, type: e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL'})}
+                    onChange={(e) => setNewVariant({...newVariant, type: e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL' | 'STYLE' | 'SEASON' | 'TECHNOLOGY'})}
                   >
                     <option value="SIZE">Размер</option>
                     <option value="COLOR">Цвет</option>
@@ -1316,7 +1312,7 @@ export const Products = () => {
                       value={variant.type}
                       onChange={(e) => {
                         const newVariants = [...editFormData.variants];
-                        newVariants[index].type = e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL';
+                        newVariants[index].type = e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL' | 'STYLE' | 'SEASON' | 'TECHNOLOGY';
                         handleEditFormChange('variants', newVariants);
                       }}
                     >
@@ -1373,7 +1369,7 @@ export const Products = () => {
                   <select
                     className="rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                     value={newVariant.type}
-                    onChange={(e) => setNewVariant({...newVariant, type: e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL'})}
+                    onChange={(e) => setNewVariant({...newVariant, type: e.target.value as 'SIZE' | 'COLOR' | 'MATERIAL' | 'STYLE' | 'SEASON' | 'TECHNOLOGY'})}
                   >
                     <option value="SIZE">Размер</option>
                     <option value="COLOR">Цвет</option>

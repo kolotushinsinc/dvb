@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { User, Product, Category, Order, DashboardStats, ApiResponse } from '@/types';
+import { User, Product, Category, Order, DashboardStats } from '@/types';
 
 const api = axios.create({
   baseURL: 'https://api.dvberry.ru/api',
@@ -251,7 +251,7 @@ export const uploadApi = {
   
   uploadMultiple: async (files: File[]): Promise<{ filename: string; thumbnailFilename: string; originalName: string; size: number; url: string; thumbnailUrl: string }[]> => {
     const formData = new FormData();
-    files.forEach((file, index) => {
+    files.forEach((file) => {
       formData.append('images', file);
     });
     

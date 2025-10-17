@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
-  Settings as SettingsIcon,
   User,
   Bell,
   Shield,
@@ -11,7 +10,6 @@ import {
   Globe
 } from 'lucide-react';
 import { authApi } from '@/lib/api';
-import { User as UserType } from '@/types';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -45,7 +43,7 @@ export const Settings = () => {
     },
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       setFormData({
         firstName: user.firstName || '',

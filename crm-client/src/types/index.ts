@@ -171,6 +171,7 @@ export interface Order {
 }
 
 export interface OrderItem {
+  _id: string;
   productId: string | Product;
   quantity: number;
   price: number;

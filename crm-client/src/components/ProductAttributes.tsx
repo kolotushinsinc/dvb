@@ -1,5 +1,5 @@
 import { useState, useEffect, ReactNode } from 'react';
-import { Category, Product } from '@/types';
+import { Category } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input as InputComponent } from '@/components/ui/input';
 import { Checkbox as CheckboxComponent } from '@/components/ui/checkbox';
@@ -179,11 +179,6 @@ const CLOTHING_SIZE_SYSTEM_OPTIONS = [
   { value: 'JEANS', label: 'Размеры джинсов (W/L): 28x30, 30x30, 32x32 и т.д.' }
 ];
 
-const CLOTHING_SIZE_OPTIONS = [
-  'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '4XL', '5XL',
-  '44', '46', '48', '50', '52', '54', '56', '58',
-  '28x30', '30x30', '32x32'
-];
 
 const FABRIC_OPTIONS = [
   { value: 'COTTON', label: 'Хлопок' },
@@ -249,7 +244,6 @@ export const ProductAttributes = ({ category, attributes, onChange, variants = [
 
   // Проверяем, есть ли цветовые варианты
   const hasColorVariants = variants.some(variant => variant.type === 'COLOR');
-  const mainColorAttribute = localAttributes.color;
 
   useEffect(() => {
     // Определяем тип категории
@@ -286,18 +280,6 @@ export const ProductAttributes = ({ category, attributes, onChange, variants = [
     onChange(updatedAttributes);
   };
 
-  const handleCheckboxChange = (key: string, option: string, checked: boolean) => {
-    const currentValues = localAttributes[key] || [];
-    let updatedValues;
-    
-    if (checked) {
-      updatedValues = [...currentValues, option];
-    } else {
-      updatedValues = currentValues.filter((v: string) => v !== option);
-    }
-    
-    handleAttributeChange(key, updatedValues);
-  };
 
   // Обработчик добавления размера
   const handleAddSize = () => {
@@ -357,46 +339,6 @@ export const ProductAttributes = ({ category, attributes, onChange, variants = [
   );
 
   // Компонент для выбора множественных значений (строковых)
-  const MultiSelectString = ({
-    label,
-    options,
-    value,
-    onChange
-  }: {
-    label: string;
-    options: string[];
-    value: string[];
-    onChange: (values: string[]) => void
-  }): ReactNode => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-slate-700 mb-2">{label}</label>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-        {options.map(option => (
-          <div key={option} className="flex items-center">
-            <CheckboxComponent
-              id={`option-${option}`}
-              checked={value?.includes(option) || false}
-              onCheckedChange={(checked) => {
-                const currentValues = value || [];
-                let updatedValues;
-                
-                if (checked) {
-                  updatedValues = [...currentValues, option];
-                } else {
-                  updatedValues = currentValues.filter((v: string) => v !== option);
-                }
-                
-                onChange(updatedValues);
-              }}
-            />
-            <LabelComponent htmlFor={`option-${option}`} className="ml-2 text-sm">
-              {option}
-            </LabelComponent>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
 
   // Общие атрибуты для всех категорий
   const renderCommonAttributes = (): ReactNode => (
