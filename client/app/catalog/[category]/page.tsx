@@ -5,23 +5,7 @@ import CategoryPageContent from './CategoryPageContent';
 
 // Функция для генерации статических параметров для динамических маршрутов
 export async function generateStaticParams() {
-  try {
-    // Попробуем загрузить категории из API
-    const response = await fetch('https://api.dvberry.ru/api/categories');
-    const data = await response.json();
-    
-    if (data.success && Array.isArray(data.data?.categories)) {
-      return data.data.categories
-        .filter((category: any) => category.isActive)
-        .map((category: any) => ({
-          category: category.slug
-        }));
-    }
-  } catch (error) {
-    console.error('Failed to load categories for static generation:', error);
-  }
-  
-  // Возвращаем fallback категории если API недоступно
+  // Возвращаем заранее определенные категории для статической генерации
   return [
     { category: 'glasses' },
     { category: 'clothing' },

@@ -147,7 +147,7 @@ const FavoritesPage = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-                      {product.category.name}
+                      {product.category?.name}
                     </span>
                     <div className="flex items-center space-x-1">
                       {product.rating && (

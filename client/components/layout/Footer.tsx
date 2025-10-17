@@ -20,10 +20,10 @@ const Footer = () => {
         console.error('Failed to load categories:', error);
         // Use fallback categories if API call fails
         setCategories([
-          { _id: 'glasses', name: 'Очки', slug: 'glasses', isActive: true, sortOrder: 1 },
-          { _id: 'clothing', name: 'Одежда', slug: 'clothing', isActive: true, sortOrder: 2 },
-          { _id: 'shoes', name: 'Обувь', slug: 'shoes', isActive: true, sortOrder: 3 },
-          { _id: 'accessories', name: 'Аксессуары', slug: 'accessories', isActive: true, sortOrder: 4 }
+          { _id: 'glasses', name: 'Очки', slug: 'glasses', isActive: true, sortOrder: 1, level: 1 },
+          { _id: 'clothing', name: 'Одежда', slug: 'clothing', isActive: true, sortOrder: 2, level: 1 },
+          { _id: 'shoes', name: 'Обувь', slug: 'shoes', isActive: true, sortOrder: 3, level: 1 },
+          { _id: 'accessories', name: 'Аксессуары', slug: 'accessories', isActive: true, sortOrder: 4, level: 1 }
         ]);
       }
     };

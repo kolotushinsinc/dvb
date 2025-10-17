@@ -153,7 +153,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
               name: product.categoryId.name,
               slug: product.categoryId.slug,
               isActive: true,
-              sortOrder: 1
+              sortOrder: 1,
+              level: 1
             } : undefined)
           },
           quantity,

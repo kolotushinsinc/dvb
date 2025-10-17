@@ -55,7 +55,7 @@ const NewProductsPage = () => {
         console.log('Active category slugs:', activeCategorySlugs);
         console.log('All products:', allProducts);
         const filteredProducts = allProducts.filter(product =>
-          activeCategorySlugs.includes(product.category.slug) && product.isBrandNew
+          product.category && activeCategorySlugs.includes(product.category.slug) && product.isBrandNew
         );
         console.log('Filtered products:', filteredProducts);
         
@@ -75,13 +75,13 @@ const NewProductsPage = () => {
 
   // Используем категории из состояния, если они загружены
   const categories = Array.from(
-    new Set(products.map(p => p.category.slug))
+    new Set(products.map(p => p.category?.slug).filter(Boolean))
   ).map(categorySlug => {
     const categoryData = categoriesState.find(c => c.slug === categorySlug);
     return {
       id: categorySlug,
       name: categoryData?.name || categorySlug,
-      count: products.filter(p => p.category.slug === categorySlug).length
+      count: products.filter(p => p.category?.slug === categorySlug).length
     };
   });
 
@@ -120,7 +120,7 @@ const NewProductsPage = () => {
   const applyFilters = () => {
     let filtered = products.filter(product => {
       const priceMatch = product.price >= priceRange[0] && product.price <= priceRange[1];
-      const categoryMatch = selectedCategories.length === 0 || selectedCategories.includes(product.category.slug);
+      const categoryMatch = selectedCategories.length === 0 || (product.category && selectedCategories.includes(product.category.slug));
       const countryMatch = selectedCountries.length === 0 || (product.country && selectedCountries.includes(product.country));
       
       return priceMatch && categoryMatch && countryMatch;
@@ -189,8 +189,8 @@ const NewProductsPage = () => {
             <div key={category.id} className="flex items-center space-x-3">
               <Checkbox
                 id={category.id}
-                checked={selectedCategories.includes(category.id)}
-                onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
+                checked={category.id ? selectedCategories.includes(category.id) : false}
+                onCheckedChange={(checked) => category.id && handleCategoryChange(category.id, checked as boolean)}
               />
               <label
                 htmlFor={category.id}
@@ -358,11 +358,13 @@ const NewProductsPage = () => {
                       </div>
                       <div className="p-5">
                         <div className="mb-2">
-                          <Link href={`/catalog/${product.category.slug}`}>
-                            <span className="text-xs text-gray-500 hover:text-gray-700">
-                              {product.category.name}
-                            </span>
-                          </Link>
+                          {product.category && (
+                            <Link href={`/catalog/${product.category.slug}`}>
+                              <span className="text-xs text-gray-500 hover:text-gray-700">
+                                {product.category.name}
+                              </span>
+                            </Link>
+                          )}
                         </div>
                         <h3 className="font-semibold text-lg mb-2 line-clamp-2">
                           <Link href={`/product/${product.slug}`} className="hover:text-blue-600 transition-colors">

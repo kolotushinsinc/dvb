@@ -9,7 +9,7 @@ import { Star, Truck, Shield, RotateCcw, CreditCard, HelpCircle } from 'lucide-r
 import Link from 'next/link';
 
 const FAQPage = () => {
-  const [activeItem, setActiveItem] = useState<string | null>(null);
+  const [activeItem, setActiveItem] = useState<string | undefined>(undefined);
 
   const faqs = [
     {
