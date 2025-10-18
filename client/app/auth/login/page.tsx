@@ -78,33 +78,38 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white">
       <Header />
       
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold text-gray-900 mb-2">
-            Вход в аккаунт
+        <div className="text-center mb-10">
+          <div className="inline-block mb-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-gold-300 to-primary-300 rounded-xl flex items-center justify-center shadow-lg mx-auto">
+              <span className="text-primary-900 font-bold text-xl">DB</span>
+            </div>
+          </div>
+          <h1 className="font-display text-4xl font-bold text-charcoal-800 mb-3 tracking-tight">
+            Вход в <span className="bg-gradient-to-r from-primary-500 to-gold-500 bg-clip-text text-transparent">аккаунт</span>
           </h1>
-          <p className="text-gray-600">
-            Введите свои данные для входа
+          <p className="text-charcoal-600 max-w-sm mx-auto">
+            Введите свои данные для входа в личный кабинет
           </p>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-gray-900">Вход</CardTitle>
-            <CardDescription className="text-gray-700">
+        <Card className="border-none shadow-xl premium-shadow rounded-2xl overflow-hidden bg-white">
+          <CardHeader className="bg-gradient-to-r from-cream-50 to-white border-b border-secondary-100 pb-6">
+            <CardTitle className="text-charcoal-800 text-2xl font-display">Вход</CardTitle>
+            <CardDescription className="text-charcoal-600 mt-2">
               Используйте email и пароль для входа в систему
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="email">Email</Label>
-                <div className="relative mt-1">
+                <Label htmlFor="email" className="text-charcoal-700 font-medium">Email</Label>
+                <div className="relative mt-2">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
+                    <Mail className="h-5 w-5 text-primary-400" />
                   </div>
                   <Input
                     id="email"
@@ -114,7 +119,7 @@ const LoginPage = () => {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className={`pl-10 ${errors.email ? 'border-red-500' : ''} bg-gray-50 border-gray-200 focus:bg-white`}
+                    className={`pl-10 ${errors.email ? 'border-red-500' : 'border-secondary-200'} bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl`}
                     placeholder="your@email.com"
                   />
                 </div>
@@ -124,10 +129,10 @@ const LoginPage = () => {
               </div>
 
               <div>
-                <Label htmlFor="password">Пароль</Label>
-                <div className="relative mt-1">
+                <Label htmlFor="password" className="text-charcoal-700 font-medium">Пароль</Label>
+                <div className="relative mt-2">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Lock className="h-5 w-5 text-gray-400" />
+                    <Lock className="h-5 w-5 text-primary-400" />
                   </div>
                   <Input
                     id="password"
@@ -137,18 +142,18 @@ const LoginPage = () => {
                     required
                     value={formData.password}
                     onChange={handleChange}
-                    className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''} bg-gray-50 border-gray-200 focus:bg-white`}
+                    className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : 'border-secondary-200'} bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl`}
                     placeholder="••••••••"
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-charcoal-500 hover:text-primary-500 transition-colors"
                     onClick={togglePasswordVisibility}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-gray-400" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-5 w-5 text-gray-400" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>
@@ -163,15 +168,15 @@ const LoginPage = () => {
                     id="remember-me"
                     name="remember-me"
                     type="checkbox"
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-200 rounded"
+                    className="h-4 w-4 text-primary-500 focus:ring-primary-300 border-secondary-200 rounded"
                   />
-                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-charcoal-600">
                     Запомнить меня
                   </label>
                 </div>
 
                 <div className="text-sm">
-                  <Link href="/auth/forgot-password" className="font-medium text-primary hover:text-indigo-700">
+                  <Link href="/auth/forgot-password" className="font-medium text-primary-500 hover:text-primary-600 transition-colors">
                     Забыли пароль?
                   </Link>
                 </div>
@@ -179,17 +184,26 @@ const LoginPage = () => {
 
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full py-6 bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                 disabled={loading}
               >
-                {loading ? 'Вход...' : 'Войти'}
+                {loading ? 'Вход...' : 'Войти в аккаунт'}
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm">
-              <p className="text-gray-600">
+            <div className="mt-8 text-center">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-secondary-100"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-4 bg-white text-charcoal-500">или</span>
+                </div>
+              </div>
+              
+              <p className="mt-6 text-charcoal-600">
                 Нет аккаунта?{' '}
-                <Link href="/auth/register" className="font-medium text-primary hover:text-indigo-700">
+                <Link href="/auth/register" className="font-medium text-primary-500 hover:text-primary-600 transition-colors">
                   Зарегистрироваться
                 </Link>
               </p>

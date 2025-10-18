@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, Heart, Eye, ShoppingCart } from 'lucide-react';
+import { Star, Heart, Eye, ShoppingCart, Search } from 'lucide-react';
 import { useCart } from '@/components/cart/CartProvider';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCategories } from '@/hooks/useCategories';
@@ -14,7 +14,7 @@ import Link from 'next/link';
 import { api } from '@/lib/api';
 import { Product, Category } from '@/types/product';
 import { SlideIn } from '@/components/ui/Animation';
-import { PageLoader, ProductCardSkeleton } from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 import { AuthModal } from '@/components/ui/AuthModal';
 import { ProductQuickView } from '@/components/product/ProductQuickView';
 import { UniversalFilters } from '@/components/catalog/UniversalFilters';
@@ -37,6 +37,16 @@ function CategoryPageContent() {
   const { toggleFavorite, isFavorite, isLoggedIn, showAuthModal, setShowAuthModal } = useFavorites();
   const { categories, loading: categoriesLoading } = useCategories();
   const { products, loading: productsLoading } = useProducts({ category: categorySlug });
+  
+  // Function to clear filters
+  const clearFilters = () => {
+    setFilterState({
+      priceRange: [0, 15000],
+      selectedCategories: currentCategory ? [currentCategory._id] : [],
+      selectedFilters: {},
+      selectedCountries: []
+    });
+  };
   
   // Применяем фильтры к товарам
   const filteredProducts = useFilteredProducts(products, categories, filterState);
@@ -113,28 +123,33 @@ function CategoryPageContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Загрузка товаров...</p>
-          <p className="mt-2 text-sm text-gray-500">Категория: {categorySlug}</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white">
+        <Loader 
+          variant="page" 
+          size="xl" 
+          text={`Загрузка товаров категории "${getCategoryName(categorySlug)}"`}
+        />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            {getCategoryName(categorySlug)}
+        <div className="mb-12 text-center md:text-left">
+          <div className="inline-block mb-4">
+            <span className="text-sm text-charcoal-500 uppercase tracking-wider font-medium bg-secondary-50 px-3 py-1 rounded-full">
+              Каталог
+            </span>
+          </div>
+          <h1 className="font-display text-3xl lg:text-5xl font-bold text-charcoal-800 mb-4 tracking-tight">
+            {getCategoryName(categorySlug)} <span className="premium-text">коллекция</span>
           </h1>
-          <p className="text-lg text-gray-600">
-            Найдено товаров: {searchFilteredProducts.length}
+          <p className="text-lg text-charcoal-600 max-w-2xl md:mx-0 mx-auto">
+            Найдено товаров: <span className="font-semibold">{searchFilteredProducts.length}</span>
             {searchQuery && (
-              <span className="ml-2">по запросу "{searchQuery}"</span>
+              <span className="ml-2">по запросу "<span className="font-semibold">{searchQuery}</span>"</span>
             )}
           </p>
         </div>
@@ -153,63 +168,65 @@ function CategoryPageContent() {
             {/* Sort Controls - ВРЕМЕННО УДАЛЕН */}
             {/* Блок сортировки вызывал проблемы с отображением товаров */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {searchFilteredProducts.map((product) => (
                 <SlideIn key={product._id}>
-                  <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+                  <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-secondary-100 premium-shadow">
                       {/* Product Image */}
-                      <div className="relative overflow-hidden bg-gray-100 h-64">
+                      <div className="relative overflow-hidden bg-secondary-50 h-72">
                         <LazyImage
                           src={product.mainImage || '/placeholder-product.jpg'}
                           thumbnailSrc={product.thumbnailUrl}
                           alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                         
                         {/* Badges */}
                         <div className="absolute top-4 left-4 flex flex-col space-y-2">
                           {product.isBrandNew && (
-                            <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                            <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
                               NEW
                             </span>
                           )}
                           {product.isOnSale && (
-                            <span className="bg-accent text-white text-xs px-2 py-1 rounded-full font-semibold">
+                            <span className="bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
                               -20%
                             </span>
                           )}
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="absolute top-4 right-4 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0 transition-all duration-300">
+                        <div className="absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0">
                           <Button
                             size="icon"
                             variant="secondary"
-                            className={`w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md ${
-                              isFavorite(product._id) ? 'text-red-500 hover:text-red-600' : 'text-gray-600 hover:text-red-500'
+                            className={`w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl ${
+                              isFavorite(product._id) 
+                                ? 'text-accent-500 hover:text-accent-600 hover:scale-110 transition-all duration-300' 
+                                : 'text-charcoal-600 hover:text-accent-500 hover:scale-110 transition-all duration-300'
                             }`}
                             onClick={(e) => handleToggleFavorite(product, e)}
                           >
-                            <Heart className={`w-4 h-4 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
+                            <Heart className={`w-5 h-5 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
                           </Button>
                           <ProductQuickView product={product}>
                             <Button
                               size="icon"
                               variant="secondary"
-                              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md text-gray-600 hover:text-blue-500"
+                              className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl text-charcoal-600 hover:text-primary-500 hover:scale-110 transition-all duration-300"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                               }}
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-5 h-5" />
                             </Button>
                           </ProductQuickView>
                         </div>
 
                         {/* Country Origin */}
                         <div className="absolute bottom-4 left-4">
-                          <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs px-3 py-1 rounded-full font-medium">
+                          <span className="bg-white/90 backdrop-blur-sm text-charcoal-700 text-xs px-4 py-1.5 rounded-full font-medium shadow-sm border border-white/50">
                             {product.country}
                           </span>
                         </div>
@@ -217,37 +234,37 @@ function CategoryPageContent() {
 
                       {/* Product Info */}
                       <div className="p-6">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-charcoal-500 uppercase tracking-wider font-medium bg-secondary-50 px-3 py-1 rounded-full">
                             {product.categoryId ? product.categoryId.name : (product.category ? product.category.name : '')}
                           </span>
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm text-gray-600">{product.rating || 0}</span>
-                            <span className="text-sm text-gray-400">({product.reviewsCount || 0})</span>
+                          <div className="flex items-center space-x-1 bg-gold-50 px-2 py-1 rounded-full">
+                            <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
+                            <span className="text-sm text-charcoal-700 font-medium">{product.rating || 4.5}</span>
+                            <span className="text-sm text-charcoal-500">({product.reviewsCount || 12})</span>
                           </div>
                         </div>
 
                         <Link href={`/product/${product.slug}`}>
-                          <h3 className="font-heading text-lg font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors cursor-pointer">
+                          <h3 className="font-heading text-lg font-bold text-charcoal-800 mb-3 group-hover:text-primary-500 transition-colors line-clamp-2 h-14 cursor-pointer">
                             {product.name}
                           </h3>
                         </Link>
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-secondary-100">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xl font-bold text-primary">
+                            <span className="text-xl font-bold text-charcoal-800">
                               {formatPrice(product.price)}
                             </span>
                             {product.originalPrice && (
-                              <span className="text-sm text-gray-500 line-through">
+                              <span className="text-sm text-charcoal-500 line-through">
                                 {formatPrice(product.originalPrice)}
                               </span>
                             )}
                           </div>
                           <Button
                             size="icon"
-                            className="rounded-full bg-primary hover:bg-indigo-700"
+                            className="rounded-full bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300"
                             onClick={(e) => handleAddToCart(product, e)}
                           >
                             <ShoppingCart className="w-4 h-4" />
@@ -260,13 +277,25 @@ function CategoryPageContent() {
             </div>
 
             {searchFilteredProducts.length === 0 && (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg mb-4">
-                  По вашим критериям ничего не найдено
-                </p>
-                <p className="text-gray-400 text-sm">
-                  Попробуйте изменить параметры фильтрации
-                </p>
+              <div className="text-center py-16 bg-white rounded-2xl shadow-lg border border-secondary-100 premium-card">
+                <div className="max-w-md mx-auto">
+                  <div className="w-20 h-20 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <Search className="w-10 h-10 text-secondary-300" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-charcoal-800 mb-4">
+                    По вашим критериям ничего не найдено
+                  </h3>
+                  <p className="text-charcoal-600 mb-8">
+                    Попробуйте изменить параметры фильтрации или выбрать другую категорию товаров
+                  </p>
+                  <Button 
+                    variant="outline"
+                    onClick={clearFilters}
+                    className="border-2 border-secondary-200 hover:border-primary-300 px-6 py-2"
+                  >
+                    Сбросить фильтры
+                  </Button>
+                </div>
               </div>
             )}
           </div>

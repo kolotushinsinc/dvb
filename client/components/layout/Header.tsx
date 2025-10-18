@@ -117,24 +117,27 @@ const Header = () => {
   ];
 
   return (
-    <header className="bg-white border-b border-cream-200 sticky top-0 z-50">
+    <header className="bg-white border-b border-secondary-100 sticky top-0 z-50 shadow-sm backdrop-blur-md bg-white/90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-slate-700 to-amber-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">DB</span>
+          <Link href="/" className="flex items-center space-x-2 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-gold-300 to-primary-300 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+              <span className="text-primary-900 font-bold text-base">DB</span>
             </div>
-            <span className="text-xl font-bold text-slate-700">DV BERRY</span>
+            <div className="flex flex-col">
+              <span className="text-xl font-bold text-charcoal-800 tracking-tight group-hover:text-primary-600 transition-colors">DV BERRY</span>
+              <span className="text-xs text-charcoal-500 -mt-1 hidden sm:block">Premium Store</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-8 ml-8">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-gray-600 hover:text-primary transition-colors duration-200 font-medium"
+                className="text-charcoal-600 hover:text-primary-500 transition-all duration-200 font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-primary-300 after:transition-all after:duration-300"
               >
                 {item.name}
               </Link>
@@ -146,10 +149,10 @@ const Header = () => {
             <Popover open={showSearchResults || (searchQuery.trim().length >= 2 && (searchResults.length > 0 || isSearching))} onOpenChange={setShowSearchResults}>
               <PopoverTrigger asChild>
                 <form onSubmit={handleSearch} className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
                   <Input
                     placeholder="Поиск товаров..."
-                    className="pl-10 bg-gray-50 border-gray-200 focus:bg-white placeholder:text-slate-700 focus:placeholder:text-slate-700/70"
+                    className="pl-10 bg-secondary-50 border-secondary-200 focus:border-primary-300 focus:ring-primary-200 focus:bg-white placeholder:text-secondary-400 focus:placeholder:text-secondary-500 rounded-full shadow-sm"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setShowSearchResults(true)}
@@ -217,12 +220,12 @@ const Header = () => {
             {isLoggedIn ? (
               <>
                 <Link href="/profile">
-                  <Button variant="ghost" size="icon" className="hidden sm:flex">
+                  <Button variant="ghost" size="icon" className="hidden sm:flex hover:bg-primary-50 hover:text-primary-600 transition-all">
                     <User className="w-5 h-5" />
                   </Button>
                 </Link>
                 <Link href="/favorites">
-                  <Button variant="ghost" size="icon" className="hidden sm:flex">
+                  <Button variant="ghost" size="icon" className="hidden sm:flex hover:bg-primary-50 hover:text-primary-600 transition-all">
                     <Heart className="w-5 h-5" />
                   </Button>
                 </Link>
@@ -232,7 +235,7 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hidden sm:flex"
+                  className="hidden sm:flex hover:bg-primary-50 hover:text-primary-600 transition-all"
                   onClick={() => setShowAuthModal(true)}
                 >
                   <User className="w-5 h-5" />
@@ -240,7 +243,7 @@ const Header = () => {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="hidden sm:flex"
+                  className="hidden sm:flex hover:bg-primary-50 hover:text-primary-600 transition-all"
                   onClick={() => setShowAuthModal(true)}
                 >
                   <Heart className="w-5 h-5" />
@@ -248,10 +251,10 @@ const Header = () => {
               </>
             )}
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" size="icon" className="relative hover:bg-primary-50 hover:text-primary-600 transition-all">
                 <ShoppingCart className="w-5 h-5" />
                 {totalQuantity > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-accent text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-2 -right-2 bg-gradient-to-r from-primary-500 to-accent-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                     {totalQuantity}
                   </span>
                 )}

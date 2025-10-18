@@ -3,16 +3,17 @@
 import { Button } from '@/components/ui/button';
 import { POPULAR_COLORS, getColorByName } from '@/lib/colors';
 
-interface ColorSelectorProps {
+export interface ColorSelectorProps {
   colors: string[];
   selectedColor?: string;
   onColorChange: (color: string) => void;
+  compact?: boolean;
 }
 
-export const ColorSelector = ({ colors, selectedColor, onColorChange }: ColorSelectorProps) => {
+export const ColorSelector = ({ colors, selectedColor, onColorChange, compact = false }: ColorSelectorProps) => {
   return (
     <div>
-      <h3 className="font-medium mb-2">Цвет</h3>
+      {!compact && <h3 className="font-medium mb-2">Цвет</h3>}
       <div className="flex flex-wrap gap-2">
         {Array.from(new Set(colors)).map((color) => {
           const colorInfo = getColorByName(color);
@@ -21,10 +22,10 @@ export const ColorSelector = ({ colors, selectedColor, onColorChange }: ColorSel
           return (
             <button
               key={color}
-              className={`w-8 h-8 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+              className={`${compact ? 'w-7 h-7' : 'w-8 h-8'} rounded-full border-2 transition-all duration-200 hover:scale-110 ${
                 isSelected 
-                  ? 'border-gray-800 ring-2 ring-offset-2 ring-gray-300' 
-                  : 'border-gray-300 hover:border-gray-400'
+                  ? 'border-primary-500 ring-2 ring-offset-2 ring-primary-200' 
+                  : 'border-secondary-200 hover:border-primary-300'
               }`}
               style={{ 
                 backgroundColor: colorInfo?.value || '#CCCCCC',
@@ -37,8 +38,8 @@ export const ColorSelector = ({ colors, selectedColor, onColorChange }: ColorSel
           );
         })}
       </div>
-      {selectedColor && (
-        <p className="text-sm text-gray-600 mt-2">
+      {selectedColor && !compact && (
+        <p className="text-sm text-charcoal-600 mt-2">
           Выбран: {selectedColor}
         </p>
       )}

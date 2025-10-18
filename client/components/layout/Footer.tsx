@@ -32,28 +32,31 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-slate-800 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-white border-t border-secondary-100 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-slate-700 to-amber-500 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">DV</span>
+          <div className="space-y-6">
+            <Link href="/" className="flex items-center space-x-2 group">
+              <div className="w-10 h-10 bg-gradient-to-br from-gold-300 to-primary-300 rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+                <span className="text-primary-900 font-bold text-base">DB</span>
               </div>
-              <span className="font-display text-2xl font-bold">BERRY</span>
-            </div>
-            <p className="text-gray-300 leading-relaxed">
+              <div className="flex flex-col">
+                <span className="text-xl font-bold text-charcoal-800 tracking-tight group-hover:text-primary-600 transition-colors">DV BERRY</span>
+                <span className="text-xs text-charcoal-500 -mt-1">Premium Store</span>
+              </div>
+            </Link>
+            <p className="text-charcoal-600 leading-relaxed">
               Уникальная торговая платформа, объединяющая солнцезащитные очки из Китая и качественную одежду из Европы.
             </p>
             <div className="flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <Link href="#" className="text-charcoal-500 hover:text-primary-500 transition-colors">
                 <Facebook className="w-5 h-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <Link href="#" className="text-charcoal-500 hover:text-primary-500 transition-colors">
                 <Instagram className="w-5 h-5" />
               </Link>
-              <Link href="#" className="text-gray-400 hover:text-primary transition-colors">
+              <Link href="#" className="text-charcoal-500 hover:text-primary-500 transition-colors">
                 <Twitter className="w-5 h-5" />
               </Link>
             </div>
@@ -61,22 +64,22 @@ const Footer = () => {
 
           {/* Catalog */}
           <div>
-            <h3 className="font-heading text-lg font-bold mb-4">Каталог</h3>
+            <h3 className="font-heading text-lg font-bold mb-6 text-charcoal-800 border-b border-secondary-100 pb-2">Каталог</h3>
             <ul className="space-y-3">
               {categories.map((category) => (
                 <li key={category._id}>
-                  <Link href={`/catalog/${category.slug}`} className="text-gray-300 hover:text-white transition-colors">
+                  <Link href={`/catalog/${category.slug}`} className="text-charcoal-600 hover:text-primary-500 transition-colors">
                     {category.name}
                   </Link>
                 </li>
               ))}
               <li>
-                <Link href="/sale" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/sale" className="text-charcoal-600 hover:text-primary-500 transition-colors">
                   Распродажа
                 </Link>
               </li>
               <li>
-                <Link href="/catalog/new" className="text-gray-300 hover:text-white transition-colors">
+                <Link href="/catalog/new" className="text-charcoal-600 hover:text-primary-500 transition-colors">
                   Новинки
                 </Link>
               </li>
@@ -85,46 +88,52 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h3 className="font-heading text-lg font-bold mb-4">Поддержка</h3>
+            <h3 className="font-heading text-lg font-bold mb-6 text-charcoal-800 border-b border-secondary-100 pb-2">Поддержка</h3>
             <ul className="space-y-3">
-              <li><Link href="/" className="text-gray-300 hover:text-white transition-colors">Главная</Link></li>
-              <li><Link href="/catalog" className="text-gray-300 hover:text-white transition-colors">Каталог</Link></li>
-              <li><Link href="/about" className="text-gray-300 hover:text-white transition-colors">О нас</Link></li>
-              <li><Link href="/contacts" className="text-gray-300 hover:text-white transition-colors">Контакты</Link></li>
-              <li><Link href="/faq" className="text-gray-300 hover:text-white transition-colors">Частые вопросы</Link></li>
+              <li><Link href="/" className="text-charcoal-600 hover:text-primary-500 transition-colors">Главная</Link></li>
+              <li><Link href="/catalog" className="text-charcoal-600 hover:text-primary-500 transition-colors">Каталог</Link></li>
+              <li><Link href="/about" className="text-charcoal-600 hover:text-primary-500 transition-colors">О нас</Link></li>
+              <li><Link href="/contacts" className="text-charcoal-600 hover:text-primary-500 transition-colors">Контакты</Link></li>
+              <li><Link href="/faq" className="text-charcoal-600 hover:text-primary-500 transition-colors">Частые вопросы</Link></li>
             </ul>
           </div>
 
           {/* Contact */}
           <div>
-            <h3 className="font-heading text-lg font-bold mb-4">Контакты</h3>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Phone className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-300">+7 (914) 731-99-09 (круглосуточно)</span>
+            <h3 className="font-heading text-lg font-bold mb-6 text-charcoal-800 border-b border-secondary-100 pb-2">Контакты</h3>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-primary-50 rounded-full flex items-center justify-center">
+                  <Phone className="w-4 h-4 text-primary-500" />
+                </div>
+                <span className="text-charcoal-600">+7 (914) 731-99-09 (круглосуточно)</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-300">siriusdark999@yandex.ru</span>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gold-50 rounded-full flex items-center justify-center">
+                  <Mail className="w-4 h-4 text-gold-500" />
+                </div>
+                <span className="text-charcoal-600">siriusdark999@yandex.ru</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <MapPin className="w-5 h-5 text-gray-400" />
-                <span className="text-gray-300">г. Находка, ул. Ленинская 10, офис 10, Россия</span>
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-accent-50 rounded-full flex items-center justify-center">
+                  <MapPin className="w-4 h-4 text-accent-500" />
+                </div>
+                <span className="text-charcoal-600">г. Находка, ул. Ленинская 10, офис 10, Россия</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-12 pt-8">
+        <div className="border-t border-secondary-100 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-400 text-sm">
+            <p className="text-charcoal-500 text-sm">
               © {currentYear} DV BERRY. Все права защищены.
             </p>
             <div className="flex space-x-6 text-sm">
-              <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="/privacy" className="text-charcoal-500 hover:text-primary-500 transition-colors">
                 Политика конфиденциальности
               </Link>
-              <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+              <Link href="/terms" className="text-charcoal-500 hover:text-primary-500 transition-colors">
                 Условия использования
               </Link>
             </div>

@@ -5,56 +5,68 @@ const benefits = [
     icon: Globe,
     title: 'Эксклюзивные очки из Китая',
     description: 'Уникальные дизайнерские модели, которых больше нет нигде',
-    color: 'text-primary',
-    bgColor: 'bg-primary/10',
+    color: 'text-primary-500',
+    bgColor: 'bg-primary-50',
+    borderColor: 'border-primary-200',
+    shadowColor: 'shadow-primary-100/50',
   },
   {
     icon: Star,
     title: 'Европейское качество одежды',
     description: 'Премиальные бренды из Италии, Германии, Франции и Турции',
-    color: 'text-accent',
-    bgColor: 'bg-accent/10',
+    color: 'text-gold-500',
+    bgColor: 'bg-gold-50',
+    borderColor: 'border-gold-200',
+    shadowColor: 'shadow-gold-100/50',
   },
   {
     icon: RotateCcw,
     title: 'Гарантия возврата',
     description: 'Возврат товара в течение 30 дней без лишних вопросов',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
+    color: 'text-accent-500',
+    bgColor: 'bg-accent-50',
+    borderColor: 'border-accent-200',
+    shadowColor: 'shadow-accent-100/50',
   },
   {
     icon: Truck,
     title: 'Быстрая доставка',
     description: 'По России от 1-3 дней, международные заказы 14-21 день',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
+    color: 'text-primary-600',
+    bgColor: 'bg-primary-50',
+    borderColor: 'border-primary-200',
+    shadowColor: 'shadow-primary-100/50',
   },
   {
     icon: Shield,
     title: 'Защита покупателя',
     description: 'Все товары застрахованы, безопасная оплата картой',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100',
+    color: 'text-bronze-500',
+    bgColor: 'bg-bronze-50',
+    borderColor: 'border-bronze-200',
+    shadowColor: 'shadow-bronze-100/50',
   },
   {
     icon: Headphones,
     title: 'Поддержка 24/7',
     description: 'Наша команда всегда готова помочь с выбором товара',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-100',
+    color: 'text-gold-600',
+    bgColor: 'bg-gold-50',
+    borderColor: 'border-gold-200',
+    shadowColor: 'shadow-gold-100/50',
   },
 ];
 
 const BenefitsSection = () => {
   return (
-    <section className="py-16 bg-cream-50">
+    <section className="py-20 bg-gradient-to-b from-white to-cream-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">
-            Почему выбирают DV BERRY?
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-charcoal-800 mb-4 tracking-tight">
+            Почему выбирают <span className="premium-text">DV BERRY</span>?
           </h2>
-          <p className="text-lg text-slate-600">
-            Мы объединили лучшее со всего мира для создания уникального шопинг-опыта
+          <p className="text-lg text-charcoal-600 max-w-3xl mx-auto">
+            Мы объединили лучшее со всего мира для создания уникального премиального шопинг-опыта
           </p>
         </div>
 
@@ -64,15 +76,15 @@ const BenefitsSection = () => {
             return (
               <div
                 key={index}
-                className="group text-center p-6 bg-white rounded-2xl border border-cream-200 hover:shadow-md transition-all duration-300"
+                className={`group text-center p-8 bg-white rounded-2xl border ${benefit.borderColor} hover:shadow-xl transition-all duration-300 ${benefit.shadowColor} hover:-translate-y-2`}
               >
-                <div className={`inline-flex items-center justify-center w-16 h-16 ${benefit.bgColor} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                  <IconComponent className={`w-8 h-8 ${benefit.color}`} />
+                <div className={`inline-flex items-center justify-center w-20 h-20 ${benefit.bgColor} rounded-2xl mb-6 group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+                  <IconComponent className={`w-10 h-10 ${benefit.color}`} />
                 </div>
-                <h3 className="font-heading text-xl font-bold text-slate-700 mb-3">
+                <h3 className="font-heading text-xl font-bold text-charcoal-800 mb-3">
                   {benefit.title}
                 </h3>
-                <p className="text-slate-600 leading-relaxed">
+                <p className="text-charcoal-600 leading-relaxed">
                   {benefit.description}
                 </p>
               </div>

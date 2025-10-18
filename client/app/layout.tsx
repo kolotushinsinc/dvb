@@ -22,6 +22,16 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body className={`${inter.variable} ${raleway.variable} ${montserrat.variable} font-sans`}>
+        <svg width="0" height="0" style={{ position: 'absolute' }}>
+          <linearGradient id="orange-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#D35400" />
+            <stop offset="100%" stopColor="#D35400" />
+          </linearGradient>
+          <linearGradient id="custard-peach-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#EED970" />
+            <stop offset="100%" stopColor="#FFBE7C" />
+          </linearGradient>
+        </svg>
         <ClientProviders>
           {children}
           <PageTransitionLoader />

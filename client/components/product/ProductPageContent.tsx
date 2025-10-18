@@ -216,17 +216,26 @@ export default function ProductPageContent() {
   };
 
   if (loading) {
-    return <div className="min-h-screen bg-cream-50 flex items-center justify-center">Загрузка...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white flex items-center justify-center">
+        <div className="text-center bg-white p-10 rounded-2xl shadow-lg border border-secondary-100 premium-card">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-400 mx-auto"></div>
+          <p className="mt-6 text-lg text-charcoal-700 font-medium">Загрузка товара...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-cream-50">
+      <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
           <NotFound message={error || 'Товар не найден'} />
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <Link href="/catalog">
-              <Button>Вернуться в каталог</Button>
+              <Button className="bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 font-medium px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border-none">
+                Вернуться в каталог
+              </Button>
             </Link>
           </div>
         </div>
@@ -235,77 +244,83 @@ export default function ProductPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
         <FadeIn>
-          <div className="flex items-center text-sm text-gray-500 mb-8">
-            <Link href="/" className="hover:text-primary">Главная</Link>
+          <div className="flex items-center text-sm text-charcoal-500 mb-10">
+            <Link href="/" className="hover:text-primary-500 transition-colors">Главная</Link>
             <span className="mx-2">/</span>
-            <Link href="/catalog" className="hover:text-primary">Каталог</Link>
+            <Link href="/catalog" className="hover:text-primary-500 transition-colors">Каталог</Link>
             <span className="mx-2">/</span>
-            <Link href={`/catalog/${product.category?.slug || ''}`} className="hover:text-gray-700 transition-colors">
+            <Link href={`/catalog/${product.category?.slug || ''}`} className="hover:text-primary-500 transition-colors">
               {product.category?.name || ''}
             </Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-900">{product.name}</span>
+            <span className="text-charcoal-800 font-medium">{product.name}</span>
           </div>
         </FadeIn>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
           {/* Product Images */}
           <SlideIn direction="left">
-            <div className="space-y-4">
+            <div className="space-y-6">
               {/* Main Image */}
-              <div className="relative overflow-hidden bg-gray-100 rounded-2xl h-96 md:h-[500px]">
+              <div className="relative overflow-hidden bg-secondary-50 rounded-2xl h-96 md:h-[500px] shadow-lg border border-secondary-100 premium-shadow">
                 <LazyImage
                   src={product.images?.[selectedImageIndex]?.url || product.mainImage || '/placeholder-product.jpg'}
                   thumbnailSrc={product.images?.[selectedImageIndex]?.thumbnailUrl}
                   alt={product.name}
-                  className="w-full h-full"
+                  className="w-full h-full object-cover"
                 />
                 
                 {/* Image Navigation */}
                 {product.images && product.images.length > 1 && (
                   <>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-gray-100 rounded-full transition-colors z-10"
-                      onClick={prevImage}
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-gray-100 rounded-full transition-colors z-10"
-                      onClick={nextImage}
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full z-10 w-12 h-12 border border-primary-100 hover:border-primary-200 hover:scale-[1.03] transition-transform"
+                          onClick={prevImage}
+                        >
+                          <ChevronLeft className="w-5 h-5 text-charcoal-700" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white rounded-full z-10 w-12 h-12 border border-primary-100 hover:border-primary-200 hover:scale-[1.03] transition-transform"
+                          onClick={nextImage}
+                        >
+                          <ChevronRight className="w-5 h-5 text-charcoal-700" />
+                        </Button>
                   </>
                 )}
 
                 {/* Badges */}
                 <div className="absolute top-4 left-4 flex flex-col space-y-2 z-10">
                   {product.isBrandNew && (
-                    <Badge className="bg-green-500 text-white">NEW</Badge>
+                    <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
+                      NEW
+                    </span>
                   )}
                   {product.isOnSale && (
-                    <Badge className="bg-accent text-white">-20%</Badge>
+                    <span className="bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
+                      -20%
+                    </span>
                   )}
                 </div>
               </div>
 
               {/* Thumbnail Images */}
               {product.images && product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-4">
                   {product.images.map((image, index) => (
                     <button
                       key={index}
-                      className={`relative overflow-hidden rounded-lg h-20 border-2 transition-colors cursor-pointer ${
-                        selectedImageIndex === index ? 'border-gray-800' : 'border-transparent hover:border-gray-300'
+                      className={`relative overflow-hidden rounded-xl h-24 transition-all cursor-pointer shadow-md hover:shadow-lg ${
+                        selectedImageIndex === index 
+                          ? 'border-2 border-primary-500 ring-2 ring-primary-200 scale-105' 
+                          : 'border border-secondary-100 hover:border-primary-200'
                       }`}
                       onClick={() => setSelectedImageIndex(index)}
                     >
@@ -326,102 +341,122 @@ export default function ProductPageContent() {
           <SlideIn direction="right">
             <div className="space-y-6">
               <div>
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-500 uppercase tracking-wide font-medium">
-                  {product.category?.name || ''}
-                </span>
-                <div className="flex items-center space-x-1">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm font-medium">{product.rating || 0}</span>
-                  <span className="text-sm text-gray-500">({product.reviews?.length || 0} отзывов)</span>
-                </div>
-              </div>
-              <h1 className="font-display text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-                {product.name}
-              </h1>
-              
-              {/* Price - Under the product name */}
-              <div className="flex items-baseline space-x-4">
-                <span className="text-3xl font-bold text-primary">
-                  {formatPrice(product.price)}
-                </span>
-                {product.originalPrice && (
-                  <span className="text-lg text-gray-500 line-through">
-                    {formatPrice(product.originalPrice)}
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm text-charcoal-500 uppercase tracking-wider font-medium bg-secondary-50 px-3 py-1 rounded-full">
+                    {product.category?.name || ''}
                   </span>
-                )}
-                {product.isOnSale && (
-                  <Badge className="bg-accent text-white">Скидка</Badge>
-                )}
+                  <div className="flex items-center space-x-1 bg-gold-50 px-3 py-1.5 rounded-full">
+                    <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
+                    <span className="text-sm text-charcoal-700 font-medium">{product.rating || 4.5}</span>
+                    <span className="text-sm text-charcoal-500">({product.reviews?.length || 0} отзывов)</span>
+                  </div>
+                </div>
+                <h1 className="font-display text-3xl lg:text-5xl font-bold text-charcoal-800 mb-6 tracking-tight">
+                  {product.name}
+                </h1>
               </div>
-            </div>
 
-            {/* Variants */}
-            {(product.variants && product.variants.length > 0) && (
-              <div className="space-y-4">
-                {/* Size Selector */}
-                {product.variants && product.variants.some(v => v.type === 'SIZE') && (
-                  <div>
-                    <h3 className="font-medium mb-2">Размер</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {Array.from(new Set(product.variants.filter(v => v.type === 'SIZE').map(v => v.value).filter(Boolean))).map((size) => (
-                        <Button
-                          key={size}
-                          variant={selectedSize === size ? "default" : "outline"}
-                          size="sm"
-                          className={selectedSize === size ? "" : "hover:bg-gray-100 hover:border-gray-300 transition-colors duration-200"}
-                          onClick={() => setSelectedSize(size)}
-                        >
-                          {size}
-                        </Button>
-                      ))}
+              {/* Product Options Cards */}
+              <div className="grid grid-cols-1 gap-4">
+                {/* Price Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-secondary-100 overflow-hidden">
+                  <div className="flex items-center">
+                    <div className="flex-1 p-4">
+                      <span className="text-2xl font-bold text-charcoal-800">
+                        {formatPrice(product.price)}
+                      </span>
+                      {product.originalPrice && (
+                        <span className="text-sm text-charcoal-500 line-through ml-2">
+                          {formatPrice(product.originalPrice)}
+                        </span>
+                      )}
+                    </div>
+                    {product.isOnSale && (
+                      <div className="bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs px-4 py-2 h-full flex items-center font-semibold">
+                        Скидка
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Color Selector Card */}
+                {product.variants && product.variants.some(v => v.type === 'COLOR') && (
+                  <div className="bg-white rounded-xl shadow-sm border border-secondary-100 p-4">
+                    <div className="flex items-center">
+                      <h3 className="font-medium text-charcoal-800 w-24">Цвет</h3>
+                      <div className="flex-1">
+                        <ColorSelector
+                          colors={Array.from(new Set(product.variants.filter(v => v.type === 'COLOR').map(v => v.value).filter(Boolean)))}
+                          selectedColor={selectedColor}
+                          onColorChange={setSelectedColor}
+                          compact={true}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* Color Selector */}
-                {product.variants && product.variants.some(v => v.type === 'COLOR') && (
-                  <ColorSelector
-                    colors={Array.from(new Set(product.variants.filter(v => v.type === 'COLOR').map(v => v.value).filter(Boolean)))}
-                    selectedColor={selectedColor}
-                    onColorChange={setSelectedColor}
-                  />
+                {/* Size Selector Card */}
+                {product.variants && product.variants.some(v => v.type === 'SIZE') && (
+                  <div className="bg-white rounded-xl shadow-sm border border-secondary-100 p-4">
+                    <div className="flex items-center">
+                      <h3 className="font-medium text-charcoal-800 w-24">Размер</h3>
+                      <div className="flex-1">
+                        <div className="flex flex-wrap gap-2">
+                          {Array.from(new Set(product.variants.filter(v => v.type === 'SIZE').map(v => v.value).filter(Boolean))).map((size) => (
+                            <Button
+                              key={size}
+                              variant={selectedSize === size ? "default" : "outline"}
+                              size="sm"
+                              className={selectedSize === size 
+                                ? "bg-gradient-to-r from-primary-400 to-primary-500 text-primary-900 shadow-sm h-8 min-w-[40px]" 
+                                : "border border-secondary-200 hover:border-primary-300 hover:text-primary-600 h-8 min-w-[40px]"}
+                              onClick={() => setSelectedSize(size)}
+                            >
+                              {size}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 )}
-              </div>
-            )}
 
-            {/* Quantity Selector */}
-            <div>
-              <h3 className="font-medium mb-2">Количество</h3>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center border rounded-lg">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleQuantityChange(quantity - 1)}
-                    disabled={quantity <= 1}
-                    className="hover:bg-transparent hover:text-gray-700"
-                  >
-                    <Minus className="w-4 h-4 text-gray-700" />
-                  </Button>
-                  <span className="px-4 py-2 text-center min-w-[50px] text-gray-900">{quantity}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleQuantityChange(quantity + 1)}
-                    className="hover:bg-transparent hover:text-gray-700"
-                  >
-                    <Plus className="w-4 h-4 text-gray-700" />
-                  </Button>
+                {/* Quantity Selector Card */}
+                <div className="bg-white rounded-xl shadow-sm border border-secondary-100 p-4">
+                  <div className="flex flex-col space-y-3">
+                    <h3 className="font-medium text-charcoal-800">Количество</h3>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center border border-secondary-200 rounded-lg">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleQuantityChange(quantity - 1)}
+                          disabled={quantity <= 1}
+                          className="hover:bg-secondary-50 hover:text-primary-600 h-9 w-9"
+                        >
+                          <Minus className="w-4 h-4 text-charcoal-700" />
+                        </Button>
+                        <span className="px-4 text-center min-w-[40px] text-charcoal-800 font-medium">{quantity}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleQuantityChange(quantity + 1)}
+                          className="hover:bg-secondary-50 hover:text-primary-600 h-9 w-9"
+                        >
+                          <Plus className="w-4 h-4 text-charcoal-700" />
+                        </Button>
+                      </div>
+                      <span className={`text-sm font-medium px-3 py-1 rounded-full ${product.stock > 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        {product.stock > 0 ? `В наличии: ${product.stock} шт.` : 'Нет в наличии'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <span className="text-sm text-gray-500">
-                  {product.stock > 0 ? `В наличии: ${product.stock} шт.` : 'Нет в наличии'}
-                </span>
               </div>
-            </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6">
               {(() => {
                 console.log('Product ID:', product._id);
                 console.log('Selected size:', selectedSize);
@@ -431,49 +466,59 @@ export default function ProductPageContent() {
               })() ? (
                 <Link href="/cart" className="flex-1">
                   <Button
-                    className="w-full py-6"
-                    variant="outline"
+                    className="w-full py-6 bg-gradient-to-r from-gold-400 to-gold-600 text-charcoal-900 hover:from-gold-500 hover:to-gold-700 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 border border-gold-300"
+                    variant="premium"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
-                    Корзина
+                    Перейти в корзину
                   </Button>
                 </Link>
               ) : (
                 <Button
                   onClick={handleAddToCart}
-                  className="flex-1 py-6"
+                  className="flex-1 py-6 bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
                   disabled={product.stock <= 0}
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  {product.stock > 0 ? 'В корзину' : 'Нет в наличии'}
+                  {product.stock > 0 ? 'Добавить в корзину' : 'Нет в наличии'}
                 </Button>
               )}
               <Button
                 variant="outline"
                 size="icon"
-                className="rounded-full"
+                className="rounded-full w-14 h-14 border-2 border-secondary-200 hover:border-accent-300 hover:text-accent-500 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                 onClick={handleToggleFavorite}
               >
-                <Heart className={`w-5 h-5 ${isFavorite(product._id) ? 'fill-red-500 text-red-500' : ''}`} />
+                <Heart className={`w-6 h-6 ${isFavorite(product._id) ? 'fill-accent-500 text-accent-500' : ''}`} />
               </Button>
-              <Button variant="outline" size="icon" className="rounded-full">
-                <Share2 className="w-5 h-5" />
+              <Button 
+                variant="outline" 
+                size="icon" 
+                className="rounded-full w-14 h-14 border-2 border-secondary-200 hover:border-primary-300 hover:text-primary-500 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+              >
+                <Share2 className="w-6 h-6" />
               </Button>
             </div>
 
             {/* Product Features */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-gray-200">
-              <div className="flex items-center space-x-2 text-sm">
-                <Truck className="w-5 h-5 text-primary" />
-                <span>Бесплатная доставка от 5000 ₽</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 mt-6 border-t border-secondary-100">
+              <div className="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-md border border-secondary-100">
+                <div className="w-10 h-10 bg-primary-50 rounded-full flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-primary-500" />
+                </div>
+                <span className="text-sm font-medium text-charcoal-700">Бесплатная доставка от 5000 ₽</span>
               </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <Shield className="w-5 h-5 text-primary" />
-                <span>Гарантия качества</span>
+              <div className="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-md border border-secondary-100">
+                <div className="w-10 h-10 bg-gold-50 rounded-full flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-gold-500" />
+                </div>
+                <span className="text-sm font-medium text-charcoal-700">Гарантия качества</span>
               </div>
-              <div className="flex items-center space-x-2 text-sm">
-                <RotateCcw className="w-5 h-5 text-primary" />
-                <span>Возврат в течение 14 дней</span>
+              <div className="flex items-center space-x-3 bg-white p-4 rounded-xl shadow-md border border-secondary-100">
+                <div className="w-10 h-10 bg-accent-50 rounded-full flex items-center justify-center">
+                  <RotateCcw className="w-5 h-5 text-accent-500" />
+                </div>
+                <span className="text-sm font-medium text-charcoal-700">Возврат в течение 14 дней</span>
               </div>
             </div>
             </div>
@@ -482,21 +527,27 @@ export default function ProductPageContent() {
 
         {/* Product Details Tabs - Desktop: Under images, Mobile: Under price */}
         <FadeIn delay={200}>
-          <div className="mt-16 lg:mt-12 lg:col-span-2">
+          <div className="mt-20 lg:mt-16 lg:col-span-2">
             <Tabs defaultValue="description" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="description" className="data-[state=active]:text-black data-[state=inactive]:text-gray-700/70">Описание</TabsTrigger>
-              <TabsTrigger value="characteristics" className="data-[state=active]:text-black data-[state=inactive]:text-gray-700/70">Характеристики</TabsTrigger>
-              <TabsTrigger value="reviews" className="data-[state=active]:text-black data-[state=inactive]:text-gray-700/70">Отзывы ({product.reviews?.length || 0})</TabsTrigger>
-            </TabsList>
+              <TabsList className="grid w-full grid-cols-3 bg-secondary-50 p-1 rounded-xl">
+                <TabsTrigger value="description" className="data-[state=active]:bg-white data-[state=active]:text-charcoal-800 data-[state=active]:shadow-md data-[state=inactive]:text-charcoal-600 rounded-lg">
+                  Описание
+                </TabsTrigger>
+                <TabsTrigger value="characteristics" className="data-[state=active]:bg-white data-[state=active]:text-charcoal-800 data-[state=active]:shadow-md data-[state=inactive]:text-charcoal-600 rounded-lg">
+                  Характеристики
+                </TabsTrigger>
+                <TabsTrigger value="reviews" className="data-[state=active]:bg-white data-[state=active]:text-charcoal-800 data-[state=active]:shadow-md data-[state=inactive]:text-charcoal-600 rounded-lg">
+                  Отзывы ({product.reviews?.length || 0})
+                </TabsTrigger>
+              </TabsList>
             
-            <TabsContent value="description" className="mt-8">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="prose max-w-none text-gray-900">
+              <TabsContent value="description" className="mt-8">
+              <Card className="border border-secondary-100 shadow-lg">
+                <CardContent className="p-8">
+                  <div className="prose max-w-none text-charcoal-700">
                     {product.description && (
                       <>
-                        <p className="text-gray-900 whitespace-pre-line">
+                        <p className="text-charcoal-700 whitespace-pre-line leading-relaxed">
                           {isDescriptionExpanded
                             ? product.description
                             : getTruncatedText(product.description)}
@@ -504,7 +555,7 @@ export default function ProductPageContent() {
                         {shouldTruncateDescription(product.description) && (
                           <Button
                             variant="link"
-                            className="p-0 h-auto text-primary font-normal"
+                            className="p-0 h-auto text-primary-500 font-medium"
                             onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
                           >
                             {isDescriptionExpanded ? 'Свернуть' : 'Подробнее'}
@@ -513,16 +564,16 @@ export default function ProductPageContent() {
                       </>
                     )}
                     {!product.description && (
-                      <p className="text-gray-900">Описание товара отсутствует.</p>
+                      <p className="text-charcoal-700">Описание товара отсутствует.</p>
                     )}
                     {product.features && product.features.length > 0 && (
                       <>
-                        <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-900">Особенности</h3>
+                        <h3 className="text-xl font-semibold mt-8 mb-4 text-charcoal-800">Особенности</h3>
                         <ul className="space-y-2">
                           {product.features.map((feature: string, index: number) => (
                             <li key={index} className="flex items-start">
-                              <Check className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                              <span className="text-gray-900">{feature}</span>
+                              <Check className="w-5 h-5 text-primary-500 mr-3 mt-0.5 flex-shrink-0" />
+                              <span className="text-charcoal-700">{feature}</span>
                             </li>
                           ))}
                         </ul>
@@ -534,34 +585,34 @@ export default function ProductPageContent() {
             </TabsContent>
             
             <TabsContent value="characteristics" className="mt-8">
-              <Card>
-                <CardContent className="p-6">
+              <Card className="border border-secondary-100 shadow-lg">
+                <CardContent className="p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h3 className="font-medium mb-4">Основные характеристики</h3>
-                      <dl className="space-y-3">
-                        <div className="flex justify-between">
-                          <dt className="text-gray-500">Категория</dt>
-                          <dd>{product.category?.name || ''}</dd>
+                      <h3 className="font-medium mb-6 text-charcoal-800 text-lg border-b border-secondary-100 pb-2">Основные характеристики</h3>
+                      <dl className="space-y-4">
+                        <div className="flex justify-between border-b border-secondary-50 pb-2">
+                          <dt className="text-charcoal-500">Категория</dt>
+                          <dd className="font-medium text-charcoal-800">{product.category?.name || ''}</dd>
                         </div>
-                        <div className="flex justify-between">
-                          <dt className="text-gray-500">Страна производитель</dt>
-                          <dd>{product.country}</dd>
+                        <div className="flex justify-between border-b border-secondary-50 pb-2">
+                          <dt className="text-charcoal-500">Страна производитель</dt>
+                          <dd className="font-medium text-charcoal-800">{product.country}</dd>
                         </div>
-                        <div className="flex justify-between">
-                          <dt className="text-gray-500">Бренд</dt>
-                          <dd>{product.brand}</dd>
+                        <div className="flex justify-between border-b border-secondary-50 pb-2">
+                          <dt className="text-charcoal-500">Бренд</dt>
+                          <dd className="font-medium text-charcoal-800">{product.brand}</dd>
                         </div>
                         {product.material && (
-                          <div className="flex justify-between">
-                            <dt className="text-gray-500">Материал</dt>
-                            <dd>{product.material}</dd>
+                          <div className="flex justify-between border-b border-secondary-50 pb-2">
+                            <dt className="text-charcoal-500">Материал</dt>
+                            <dd className="font-medium text-charcoal-800">{product.material}</dd>
                           </div>
                         )}
                         {product.weight && (
-                          <div className="flex justify-between">
-                            <dt className="text-gray-500">Вес</dt>
-                            <dd>{product.weight} г</dd>
+                          <div className="flex justify-between border-b border-secondary-50 pb-2">
+                            <dt className="text-charcoal-500">Вес</dt>
+                            <dd className="font-medium text-charcoal-800">{product.weight} г</dd>
                           </div>
                         )}
                       </dl>
@@ -569,11 +620,11 @@ export default function ProductPageContent() {
                     
                     {product.dimensions && (
                       <div>
-                        <h3 className="font-medium mb-4">Габариты</h3>
+                        <h3 className="font-medium mb-6 text-charcoal-800 text-lg border-b border-secondary-100 pb-2">Габариты</h3>
                         <dl className="space-y-3">
-                          <div className="flex justify-between">
-                            <dt className="text-gray-500">Длина</dt>
-                            <dd>{product.dimensions} см</dd>
+                          <div className="flex justify-between border-b border-secondary-50 pb-2">
+                            <dt className="text-charcoal-500">Длина</dt>
+                            <dd className="font-medium text-charcoal-800">{product.dimensions} см</dd>
                           </div>
                         </dl>
                       </div>
@@ -584,14 +635,14 @@ export default function ProductPageContent() {
             </TabsContent>
             
             <TabsContent value="reviews" className="mt-8">
-              <Card>
-                <CardContent className="p-6">
+              <Card className="border border-secondary-100 shadow-lg">
+                <CardContent className="p-8">
                   {product.reviews && product.reviews.length > 0 ? (
                     <div className="space-y-6">
                       {product.reviews.map((review, index) => (
-                        <div key={index} className="border-b border-gray-200 pb-6 last:border-0 last:pb-0">
+                        <div key={index} className="border-b border-secondary-100 pb-6 last:border-0 last:pb-0">
                           <div className="flex justify-between mb-2">
-                            <h4 className="font-medium">Аноним</h4>
+                            <h4 className="font-medium text-charcoal-800">Аноним</h4>
                             <div className="flex items-center">
                               <div className="flex">
                                 {[...Array(5)].map((_, i) => (
@@ -599,24 +650,24 @@ export default function ProductPageContent() {
                                     key={i}
                                     className={`w-4 h-4 ${
                                       i < review.rating
-                                        ? 'fill-yellow-400 text-yellow-400'
-                                        : 'text-gray-300'
+                                        ? 'fill-gold-500 text-gold-500'
+                                        : 'text-secondary-300'
                                     }`}
                                   />
                                 ))}
                               </div>
-                              <span className="text-sm text-gray-500 ml-2">
+                              <span className="text-sm text-charcoal-500 ml-2">
                                 {new Date(review.createdAt).toLocaleDateString('ru-RU')}
                               </span>
                             </div>
                           </div>
-                          <p className="text-gray-600">{review.comment}</p>
+                          <p className="text-charcoal-600">{review.comment}</p>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500">Отзывов пока нет. Будьте первым, кто оставит отзыв!</p>
+                    <div className="text-center py-10">
+                      <p className="text-charcoal-500">Отзывов пока нет. Будьте первым, кто оставит отзыв!</p>
                     </div>
                   )}
                 </CardContent>
@@ -629,67 +680,121 @@ export default function ProductPageContent() {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <FadeIn delay={400}>
-            <div className="mt-16">
-              <h2 className="font-display text-2xl font-bold text-gray-900 mb-8">
-              Сопутствующие товары
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {relatedProducts.map((product) => (
-                <Link key={product._id} href={`/product/${product.slug}`}>
-                  <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg">
-                    <div className="relative overflow-hidden bg-gray-100 h-48">
-                      <LazyImage
-                        src={product.mainImage || '/placeholder-product.jpg'}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                      {product.isBrandNew && (
-                        <Badge className="absolute top-2 left-2 bg-green-500 text-white">
-                          NEW
-                        </Badge>
-                      )}
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-medium text-gray-900 mb-1 group-hover:text-gray-700 transition-colors truncate">
-                        {product.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 mb-2">{product.category?.name || ''}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-primary">
-                          {formatPrice(product.price)}
-                        </span>
-                        <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <ProductQuickView product={product}>
+            <div className="mt-20">
+              <div className="flex items-center justify-between mb-10">
+                <h2 className="font-display text-3xl font-bold text-charcoal-800 tracking-tight">
+                  Сопутствующие <span className="premium-text">товары</span>
+                </h2>
+                <Link href="/catalog" className="text-primary-500 hover:text-primary-600 font-medium flex items-center">
+                  Смотреть все <ChevronRight className="w-4 h-4 ml-1" />
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {relatedProducts.map((product) => (
+                  <SlideIn key={product._id} delay={50}>
+                    <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-secondary-100 premium-shadow">
+                      {/* Product Image */}
+                      <Link href={`/product/${product.slug}`}>
+                        <div className="relative overflow-hidden bg-secondary-50 h-64">
+                          <LazyImage
+                            src={product.mainImage || '/placeholder-product.jpg'}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                          
+                          {/* Badges */}
+                          <div className="absolute top-4 left-4 flex flex-col space-y-2">
+                            {product.isBrandNew && (
+                              <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
+                                NEW
+                              </span>
+                            )}
+                            {product.isOnSale && (
+                              <span className="bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
+                                -20%
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Quick Actions */}
+                          <div className="absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-300 opacity-0 group-hover:opacity-100 transform translate-x-4 group-hover:translate-x-0">
                             <Button
-                              size="sm"
-                              variant="outline"
-                              className="rounded-full"
+                              size="icon"
+                              variant="secondary"
+                              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl text-charcoal-600 hover:text-accent-500 hover:scale-110 transition-all duration-300"
                               onClick={(e) => {
                                 e.preventDefault();
+                                e.stopPropagation();
+                                toggleFavorite(product._id);
                               }}
                             >
-                              <Eye className="w-4 h-4" />
+                              <Heart className={`w-5 h-5 ${isFavorite(product._id) ? 'fill-accent-500 text-accent-500' : ''}`} />
                             </Button>
-                          </ProductQuickView>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="rounded-full"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              addItem(product);
-                              toast.success('Товар добавлен в корзину!');
-                            }}
-                          >
-                            <ShoppingCart className="w-4 h-4" />
-                          </Button>
+                            <ProductQuickView product={product}>
+                              <Button
+                                size="icon"
+                                variant="secondary"
+                                className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl text-charcoal-600 hover:text-primary-500 hover:scale-110 transition-all duration-300"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
+                              >
+                                <Eye className="w-5 h-5" />
+                              </Button>
+                            </ProductQuickView>
+                          </div>
+
+                          {/* Country Origin */}
+                          {product.country && (
+                            <div className="absolute bottom-4 left-4">
+                              <span className="bg-white/90 backdrop-blur-sm text-charcoal-700 text-xs px-4 py-1.5 rounded-full font-medium shadow-sm border border-white/50">
+                                {product.country}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+
+                      {/* Product Info */}
+                      <div className="p-6">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-charcoal-500 uppercase tracking-wider font-medium bg-secondary-50 px-3 py-1 rounded-full">
+                            {product.category?.name || ''}
+                          </span>
+                          <div className="flex items-center space-x-1 bg-gold-50 px-2 py-1 rounded-full">
+                            <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
+                            <span className="text-sm text-charcoal-700 font-medium">{product.rating || 4.5}</span>
+                          </div>
+                        </div>
+
+                        <Link href={`/product/${product.slug}`}>
+                          <h3 className="font-heading text-lg font-bold text-charcoal-800 mb-3 group-hover:text-primary-500 transition-colors line-clamp-2 h-14">
+                            {product.name}
+                          </h3>
+                        </Link>
+
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-secondary-100">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-xl font-bold text-charcoal-800">
+                              {formatPrice(product.price)}
+                            </span>
+                            {product.originalPrice && (
+                              <span className="text-sm text-charcoal-500 line-through">
+                                {formatPrice(product.originalPrice)}
+                              </span>
+                            )}
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center transition-all">
+                            <span className="text-sm text-primary-500 group-hover:text-primary-600">→</span>
+                          </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+                    </div>
+                  </SlideIn>
+                ))}
+              </div>
             </div>
           </FadeIn>
         )}

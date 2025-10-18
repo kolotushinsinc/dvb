@@ -1,164 +1,115 @@
+'use client';
+
 import React from 'react';
-import { Loader2 } from 'lucide-react';
 
 interface LoaderProps {
-  size?: 'sm' | 'md' | 'lg';
-  className?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  variant?: 'default' | 'button' | 'inline' | 'page';
   text?: string;
+  className?: string;
+  containerClassName?: string;
 }
 
-export const Loader: React.FC<LoaderProps> = ({ 
+/**
+ * Premium unified loader component that can be used in different contexts
+ */
+const Loader: React.FC<LoaderProps> = ({ 
   size = 'md', 
+  variant = 'default',
+  text,
   className = '',
-  text 
+  containerClassName = ''
 }) => {
+  // Size classes for the loader
   const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8'
+    xs: 'w-4 h-4',
+    sm: 'w-6 h-6',
+    md: 'w-10 h-10',
+    lg: 'w-16 h-16',
+    xl: 'w-24 h-24',
+    full: 'w-32 h-32'
   };
-
+  
+  // Text size classes based on loader size
+  const textSizeClasses = {
+    xs: 'text-xs',
+    sm: 'text-xs',
+    md: 'text-sm',
+    lg: 'text-base',
+    xl: 'text-lg',
+    full: 'text-xl'
+  };
+  
+  // Container classes based on variant
+  const containerVariantClasses = {
+    default: 'flex items-center justify-center',
+    button: 'inline-flex items-center justify-center',
+    inline: 'inline-flex items-center',
+    page: 'fixed inset-0 z-[9999] flex items-center justify-center bg-white/80 backdrop-blur-sm'
+  };
+  
+  // Loader wrapper classes based on variant
+  const loaderWrapperClasses = {
+    default: '',
+    button: '',
+    inline: '',
+    page: 'bg-white p-8 rounded-2xl shadow-xl border border-secondary-100 premium-shadow flex flex-col items-center'
+  };
+  
+  // Render the premium loader
   return (
-    <div className={`flex items-center justify-center ${className}`}>
-      <Loader2 className={`animate-spin ${sizeClasses[size]}`} />
-      {text && <span className="ml-2 text-sm text-gray-600">{text}</span>}
-    </div>
-  );
-};
-
-interface PageLoaderProps {
-  className?: string;
-}
-
-export const PageLoader: React.FC<PageLoaderProps> = ({ className = '' }) => {
-  return (
-    <div className={`min-h-[400px] flex items-center justify-center ${className}`}>
-      <div className="text-center">
-        <Loader size="lg" />
-        <p className="mt-4 text-gray-600">Загрузка...</p>
+    <div className={`${containerVariantClasses[variant]} ${containerClassName}`}>
+      <div className={`${loaderWrapperClasses[variant]}`}>
+        <div className={`relative ${sizeClasses[size]} ${className}`}>
+          {/* Outer circle with gradient border */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary-300 to-gold-300 p-[2px]">
+            <div className="absolute inset-0 rounded-full bg-white"></div>
+          </div>
+          
+          {/* Spinning gradient ring */}
+          <div className="absolute inset-0 rounded-full border-2 border-transparent animate-spin" 
+               style={{ 
+                 borderLeftColor: '#ffd091', 
+                 borderTopColor: '#ffd091',
+                 animationDuration: '0.8s'
+               }}>
+          </div>
+          
+          {/* Inner circle with logo or icon */}
+          <div className="absolute inset-[15%] rounded-full bg-gradient-to-br from-primary-50 to-cream-50 flex items-center justify-center">
+            <span className="text-primary-500 font-bold text-[40%]">DB</span>
+          </div>
+        </div>
+        
+        {/* Text below loader */}
+        {text && (
+          <p className={`mt-4 ${textSizeClasses[size]} text-charcoal-600 font-medium`}>
+            {text}
+          </p>
+        )}
       </div>
     </div>
   );
 };
 
-interface ButtonLoaderProps {
-  className?: string;
-}
+// Export the unified loader component
+export { Loader };
 
-export const ButtonLoader: React.FC<ButtonLoaderProps> = ({ className = '' }) => {
-  return <Loader size="sm" className={className} />;
-};
-
-interface CardSkeletonProps {
-  count?: number;
-  className?: string;
-}
-
-export const CardSkeleton: React.FC<CardSkeletonProps> = ({ 
-  count = 1, 
-  className = '' 
-}) => {
-  return (
-    <div className={`space-y-4 ${className}`}>
-      {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="bg-white rounded-lg shadow p-4 animate-pulse">
-          <div className="flex space-x-4">
-            <div className="rounded-md bg-gray-200 h-24 w-24"></div>
-            <div className="flex-1 space-y-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-              </div>
-              <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-interface ProductCardSkeletonProps {
-  count?: number;
-  className?: string;
-}
-
-export const ProductCardSkeleton: React.FC<ProductCardSkeletonProps> = ({ 
-  count = 1, 
-  className = '' 
-}) => {
-  return (
-    <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 ${className}`}>
-      {Array.from({ length: count }).map((_, index) => (
-        <div key={index} className="bg-white rounded-lg shadow overflow-hidden animate-pulse">
-          <div className="bg-gray-200 h-48 w-full"></div>
-          <div className="p-4 space-y-3">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-6 bg-gray-200 rounded w-1/3"></div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-interface TableSkeletonProps {
-  rows?: number;
-  columns?: number;
-  className?: string;
-}
-
-export const TableSkeleton: React.FC<TableSkeletonProps> = ({ 
-  rows = 5, 
-  columns = 4, 
-  className = '' 
-}) => {
-  return (
-    <div className={`bg-white rounded-lg shadow overflow-hidden ${className}`}>
-      <div className="animate-pulse">
-        <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
-          <div className="grid grid-cols-4 gap-4">
-            {Array.from({ length: columns }).map((_, index) => (
-              <div key={index} className="h-4 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-        <div className="divide-y divide-gray-200">
-          {Array.from({ length: rows }).map((_, rowIndex) => (
-            <div key={rowIndex} className="px-6 py-4">
-              <div className="grid grid-cols-4 gap-4">
-                {Array.from({ length: columns }).map((_, colIndex) => (
-                  <div key={colIndex} className="h-4 bg-gray-200 rounded"></div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+// Export named components for backward compatibility
+export const PageLoader = (props: any) => <Loader variant="page" size="xl" text="Загрузка..." {...props} />;
+export const ButtonLoader = (props: any) => <Loader variant="button" size="sm" {...props} />;
+export const ProductCardSkeleton = ({ count = 6, ...props }: { count?: number } & any) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+    {Array.from({ length: count }).map((_, index) => (
+      <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-secondary-100 h-[400px] flex items-center justify-center">
+        <Loader size="lg" text="Загрузка..." {...props} />
       </div>
-    </div>
-  );
-};
+    ))}
+  </div>
+);
+export const CardSkeleton = ProductCardSkeleton;
+export const TableSkeleton = (props: any) => <div className="p-8 text-center"><Loader size="lg" text="Загрузка таблицы..." {...props} /></div>;
+export const FormSkeleton = (props: any) => <div className="p-8 text-center"><Loader size="lg" text="Загрузка формы..." {...props} /></div>;
 
-interface FormSkeletonProps {
-  fields?: number;
-  className?: string;
-}
-
-export const FormSkeleton: React.FC<FormSkeletonProps> = ({ 
-  fields = 4, 
-  className = '' 
-}) => {
-  return (
-    <div className={`space-y-6 ${className}`}>
-      {Array.from({ length: fields }).map((_, index) => (
-        <div key={index} className="space-y-2">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-10 bg-gray-200 rounded"></div>
-        </div>
-      ))}
-      <div className="h-10 bg-gray-200 rounded w-1/3"></div>
-    </div>
-  );
-};
+// Default export for easier imports
+export default Loader;

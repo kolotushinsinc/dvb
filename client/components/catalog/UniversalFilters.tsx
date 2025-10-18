@@ -510,17 +510,17 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
       case 'SELECT':
         return (
           <div key={filter.key} className="space-y-3">
-            <h3 className="font-heading text-lg font-semibold mb-4">{filter.label}</h3>
+            <h3 className="font-heading text-lg font-semibold mb-5 text-charcoal-800 border-b border-secondary-100 pb-2">{filter.label}</h3>
             <Select 
               value={selectedValues[0] || ''} 
               onValueChange={(value) => handleFilterChange(filter.key, value, !!value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-secondary-200 focus:ring-primary-300 focus:border-primary-300 bg-secondary-50">
                 <SelectValue placeholder={`Выберите ${filter.label.toLowerCase()}`} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="border-secondary-200">
                 {filter.options?.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
+                  <SelectItem key={option.value} value={option.value} className="focus:bg-primary-50 focus:text-primary-600">
                     {option.label}
                   </SelectItem>
                 ))}
@@ -533,8 +533,8 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
       case 'CHECKBOX':
         return (
           <div key={filter.key} className="space-y-3">
-            <h3 className="font-heading text-lg font-semibold mb-4">{filter.label}</h3>
-            <div className="space-y-3">
+            <h3 className="font-heading text-lg font-semibold mb-5 text-charcoal-800 border-b border-secondary-100 pb-2">{filter.label}</h3>
+            <div className="space-y-4">
               {filter.options?.map(option => (
                 <div key={option.value} className="flex items-center space-x-3">
                   <Checkbox
@@ -543,14 +543,15 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
                     onCheckedChange={(checked) => 
                       handleFilterChange(filter.key, option.value, checked as boolean)
                     }
+                    className="text-primary-500 border-secondary-200 focus:ring-primary-300"
                   />
                   <label
                     htmlFor={`${filter.key}-${option.value}`}
-                    className="flex-1 text-sm cursor-pointer"
+                    className="flex-1 text-sm cursor-pointer font-medium text-charcoal-700"
                   >
                     {option.label}
                     {option.count !== undefined && (
-                      <span className="text-gray-400 ml-1">({option.count})</span>
+                      <span className="text-charcoal-400 ml-1">({option.count})</span>
                     )}
                   </label>
                 </div>
@@ -614,11 +615,11 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
   };
 
   const FilterSection = () => (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Price Range */}
       <div>
-        <h3 className="font-heading text-lg font-semibold mb-4">Цена</h3>
-        <div className="space-y-4">
+        <h3 className="font-heading text-lg font-semibold mb-5 text-charcoal-800 border-b border-secondary-100 pb-2">Цена</h3>
+        <div className="space-y-6">
           <Slider
             value={filterState.priceRange}
             onValueChange={(value) => setFilterState(prev => ({ ...prev, priceRange: value as [number, number] }))}
@@ -626,30 +627,31 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
             step={100}
             className="w-full"
           />
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>{formatPrice(filterState.priceRange[0])}</span>
-            <span>{formatPrice(filterState.priceRange[1])}</span>
+          <div className="flex justify-between">
+            <span className="text-sm font-medium bg-secondary-50 px-3 py-1 rounded-full text-charcoal-700">{formatPrice(filterState.priceRange[0])}</span>
+            <span className="text-sm font-medium bg-secondary-50 px-3 py-1 rounded-full text-charcoal-700">{formatPrice(filterState.priceRange[1])}</span>
           </div>
         </div>
       </div>
 
       {/* Categories */}
       <div>
-        <h3 className="font-heading text-lg font-semibold mb-4">Категории</h3>
-        <div className="space-y-3">
+        <h3 className="font-heading text-lg font-semibold mb-5 text-charcoal-800 border-b border-secondary-100 pb-2">Категории</h3>
+        <div className="space-y-4">
           {categoryList.map(category => (
             <div key={category.id} className="flex items-center space-x-3">
               <Checkbox
                 id={category.id}
                 checked={filterState.selectedCategories.includes(category.id)}
                 onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
+                className="text-primary-500 border-secondary-200 focus:ring-primary-300"
               />
               <label
                 htmlFor={category.id}
-                className="flex-1 text-sm cursor-pointer hover:text-primary transition-colors"
+                className="flex-1 text-sm cursor-pointer hover:text-primary-500 transition-colors font-medium text-charcoal-700"
               >
                 {category.name}
-                <span className="text-gray-400 ml-1">({category.count})</span>
+                <span className="text-charcoal-400 ml-1">({category.count})</span>
               </label>
             </div>
           ))}
@@ -658,21 +660,22 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
 
       {/* Countries */}
       <div>
-        <h3 className="font-heading text-lg font-semibold mb-4">Страна производитель</h3>
-        <div className="space-y-3">
+        <h3 className="font-heading text-lg font-semibold mb-5 text-charcoal-800 border-b border-secondary-100 pb-2">Страна производитель</h3>
+        <div className="space-y-4">
           {countries.map(country => (
             <div key={country.id} className="flex items-center space-x-3">
               <Checkbox
                 id={country.id || ''}
                 checked={country.id ? filterState.selectedCountries.includes(country.id) : false}
                 onCheckedChange={(checked) => country.id && handleCountryChange(country.id, checked as boolean)}
+                className="text-primary-500 border-secondary-200 focus:ring-primary-300"
               />
               <label
                 htmlFor={country.id || ''}
-                className="flex-1 text-sm cursor-pointer"
+                className="flex-1 text-sm cursor-pointer font-medium text-charcoal-700"
               >
                 {country.name}
-                <span className="text-gray-400 ml-1">({country.count})</span>
+                <span className="text-charcoal-400 ml-1">({country.count})</span>
               </label>
             </div>
           ))}
@@ -686,7 +689,7 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
       <Button
         onClick={clearFilters}
         variant="outline"
-        className="w-full"
+        className="w-full border-2 border-secondary-200 hover:border-primary-300 hover:text-primary-600 font-medium"
       >
         Очистить фильтры
       </Button>
@@ -696,10 +699,11 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
   return (
     <>
       {/* Mobile Filter Toggle */}
+      {/* Mobile Filter Toggle */}
       <div className="lg:hidden fixed bottom-4 right-4 z-50">
         <Button
           onClick={() => setShowFilters(!showFilters)}
-          className="rounded-full shadow-lg"
+          className="rounded-full shadow-lg bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600"
           size="lg"
         >
           <Filter className="w-5 h-5" />
@@ -710,17 +714,18 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
       <div className={`${showFilters ? 'fixed inset-0 z-40 bg-white p-6 lg:relative lg:inset-auto lg:z-auto lg:bg-transparent lg:p-0' : 'hidden'} lg:block w-full lg:w-80 lg:flex-shrink-0`}>
         {showFilters && (
           <div className="lg:hidden flex justify-between items-center mb-6">
-            <h2 className="font-heading text-xl font-bold">Фильтры</h2>
+            <h2 className="font-heading text-2xl font-bold text-charcoal-800">Фильтры</h2>
             <Button
               onClick={() => setShowFilters(false)}
               variant="ghost"
               size="icon"
+              className="hover:bg-primary-50 hover:text-primary-500"
             >
               <X className="w-5 h-5" />
             </Button>
           </div>
         )}
-        <div className="lg:bg-white lg:rounded-2xl lg:p-6 lg:shadow-sm">
+        <div className="lg:bg-white lg:rounded-2xl lg:p-8 lg:shadow-lg lg:border lg:border-secondary-100 premium-shadow">
           <FilterSection />
         </div>
       </div>

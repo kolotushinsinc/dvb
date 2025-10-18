@@ -7,7 +7,7 @@ import { getAllProducts } from '@/lib/products';
 import { useFavorites } from '@/hooks/useFavorites';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { CardSkeleton } from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 import { FadeIn } from '@/components/ui/Animation';
 import { AuthModal } from '@/components/ui/AuthModal';
 import { ProductQuickView } from '@/components/product/ProductQuickView';
@@ -62,32 +62,34 @@ const PopularProducts = () => {
   };
 
   return (
-    <section className="py-16 bg-cream-100">
+    <section className="py-20 bg-gradient-to-b from-cream-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-slate-700 mb-4">
-            Наши товары
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-charcoal-800 mb-4 tracking-tight">
+            Популярные <span className="premium-text">товары</span>
           </h2>
-          <p className="text-lg text-slate-600">
-            Все товары из нашего ассортимента - очки, одежда и обувь
+          <p className="text-lg text-charcoal-600 max-w-3xl mx-auto">
+            Эксклюзивная коллекция премиальных товаров, отобранных нашими стилистами
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {loading ? (
             Array.from({ length: 6 }).map((_, index) => (
-              <CardSkeleton key={index} />
+              <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-secondary-100 h-[400px] flex items-center justify-center">
+                <Loader size="lg" text="Загрузка..." />
+              </div>
             ))
           ) : products.length > 0 ? (
             products.map((product, index) => (
               <FadeIn key={product._id} delay={index * 0.1}>
                 <div
-                  className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+                  className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-secondary-100 premium-shadow"
                   onMouseEnter={() => setHoveredProduct(product._id)}
                   onMouseLeave={() => setHoveredProduct(null)}
                 >
                 {/* Product Image */}
-                <div className="relative overflow-hidden bg-gray-100 h-64">
+                <div className="relative overflow-hidden bg-secondary-50 h-72">
                   <Link href={`/product/${product.slug}`}>
                     <LazyImage
                       src={product.mainImage || '/placeholder-product.jpg'}
@@ -100,49 +102,51 @@ const PopularProducts = () => {
                   {/* Badges */}
                   <div className="absolute top-4 left-4 flex flex-col space-y-2">
                     {product.isBrandNew && (
-                      <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+                      <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
                         NEW
                       </span>
                     )}
                     {product.isOnSale && (
-                      <span className="bg-accent text-white text-xs px-2 py-1 rounded-full font-semibold">
+                      <span className="bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
                         -20%
                       </span>
                     )}
                   </div>
 
                   {/* Quick Actions */}
-                  <div className={`absolute top-4 right-4 flex flex-col space-y-2 transition-all duration-300 ${
+                  <div className={`absolute top-4 right-4 flex flex-col space-y-3 transition-all duration-300 ${
                     hoveredProduct === product._id ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
                   }`}>
                     <Button
                       size="icon"
                       variant="secondary"
-                      className={`w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md ${
-                        isFavorite(product._id) ? 'text-red-500 hover:text-red-600' : 'text-gray-600 hover:text-red-500'
+                      className={`w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl ${
+                        isFavorite(product._id) 
+                          ? 'text-accent-500 hover:text-accent-600 hover:scale-110 transition-all duration-300' 
+                          : 'text-charcoal-600 hover:text-accent-500 hover:scale-110 transition-all duration-300'
                       }`}
                       onClick={(e) => handleToggleFavorite(product, e)}
                     >
-                      <Heart className={`w-4 h-4 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
+                      <Heart className={`w-5 h-5 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
                     </Button>
                     <ProductQuickView product={product}>
                       <Button
                         size="icon"
                         variant="secondary"
-                        className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md text-gray-600 hover:text-blue-500"
+                        className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl text-charcoal-600 hover:text-primary-500 hover:scale-110 transition-all duration-300"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
                         }}
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-5 h-5" />
                       </Button>
                     </ProductQuickView>
                   </div>
 
                   {/* Country Origin */}
                   <div className="absolute bottom-4 left-4">
-                    <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs px-3 py-1 rounded-full font-medium">
+                    <span className="bg-white/90 backdrop-blur-sm text-charcoal-700 text-xs px-4 py-1.5 rounded-full font-medium shadow-sm border border-white/50">
                       {product.country || 'Россия'}
                     </span>
                   </div>
@@ -150,33 +154,36 @@ const PopularProducts = () => {
 
                 {/* Product Info */}
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-500 uppercase tracking-wide font-medium">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-charcoal-500 uppercase tracking-wider font-medium bg-secondary-50 px-3 py-1 rounded-full">
                       {product.categoryId ? product.categoryId.name : (product.category ? product.category.name : 'Категория')}
                     </span>
-                    <div className="flex items-center space-x-1">
-                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                      <span className="text-sm text-gray-600">{product.rating || 0}</span>
-                      <span className="text-sm text-gray-400">({product.reviewsCount || 0})</span>
+                    <div className="flex items-center space-x-1 bg-gold-50 px-2 py-1 rounded-full">
+                      <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
+                      <span className="text-sm text-charcoal-700 font-medium">{product.rating || 4.5}</span>
+                      <span className="text-sm text-charcoal-500">({product.reviewsCount || 12})</span>
                     </div>
                   </div>
 
                   <Link href={`/product/${product.slug}`}>
-                    <h3 className="font-heading text-lg font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
+                    <h3 className="font-heading text-lg font-bold text-charcoal-800 mb-3 group-hover:text-primary-500 transition-colors line-clamp-2 h-14">
                       {product.name}
                     </h3>
                   </Link>
 
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between mt-4 pt-4 border-t border-secondary-100">
                     <div className="flex items-center space-x-2">
-                      <span className="text-xl font-bold text-gray-900">
+                      <span className="text-xl font-bold text-charcoal-800">
                         {formatPrice(product.price)}
                       </span>
                       {product.originalPrice && (
-                        <span className="text-sm text-gray-500 line-through">
+                        <span className="text-sm text-charcoal-500 line-through">
                           {formatPrice(product.originalPrice)}
                         </span>
                       )}
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center transition-all">
+                      <span className="text-sm text-primary-500 group-hover:text-primary-600">→</span>
                     </div>
                   </div>
                 </div>
@@ -184,12 +191,12 @@ const PopularProducts = () => {
           </FadeIn>
         ))
       ) : (
-        <div className="col-span-3 text-center py-12">
-          <div className="bg-white rounded-2xl shadow-md p-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Товары скоро появятся</h3>
-            <p className="text-gray-600 mb-6">Мы сейчас обновляем наш ассортимент. Пожалуйста, зайдите позже, чтобы увидеть все товары.</p>
+        <div className="col-span-3 text-center py-16">
+          <div className="bg-white rounded-2xl shadow-lg p-12 border border-secondary-100 premium-card">
+            <h3 className="text-2xl font-bold text-charcoal-800 mb-4">Товары скоро появятся</h3>
+            <p className="text-charcoal-600 mb-8 text-lg">Мы сейчас обновляем наш ассортимент премиальных товаров. Пожалуйста, зайдите позже, чтобы увидеть все новинки.</p>
             <Link href="/catalog">
-              <Button size="lg" variant="outline" className="bg-white hover:bg-gray-50">
+              <Button size="lg" className="bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 font-medium px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border-none">
                 Смотреть весь каталог
               </Button>
             </Link>
@@ -198,9 +205,9 @@ const PopularProducts = () => {
       )}
         </div>
 
-        <div className="text-center mt-12">
+        <div className="text-center mt-16">
           <Link href="/catalog">
-            <Button size="lg" variant="outline" className="bg-white hover:bg-gray-50">
+            <Button size="lg" className="bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 font-medium px-8 py-6 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 border-none">
               Смотреть весь каталог
             </Button>
           </Link>

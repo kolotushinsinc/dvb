@@ -4,48 +4,48 @@
 
 @layer base {
   :root {
-    --background: 250 249 246;
-    --foreground: 45 62 80;
+    --background: 255 255 255;
+    --foreground: 31 41 51;
     --card: 255 255 255;
-    --card-foreground: 45 62 80;
+    --card-foreground: 31 41 51;
     --popover: 255 255 255;
-    --popover-foreground: 45 62 80;
-    --primary: 45 62 80;
-    --primary-foreground: 255 255 255;
-    --secondary: 211 84 0;
+    --popover-foreground: 31 41 51;
+    --primary: 255 208 145;
+    --primary-foreground: 51 27 0;
+    --secondary: 50 64 77;
     --secondary-foreground: 255 255 255;
-    --muted: 250 249 246;
-    --muted-foreground: 115 115 115;
-    --accent: 227 119 27;
-    --accent-foreground: 255 255 255;
-    --destructive: 239 68 68;
+    --muted: 245 247 250;
+    --muted-foreground: 97 135 158;
+    --accent: 255 165 102;
+    --accent-foreground: 51 27 0;
+    --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
-    --border: 229 229 229;
-    --input: 229 229 229;
-    --ring: 147 197 253;
+    --border: 203 210 217;
+    --input: 203 210 217;
+    --ring: 255 136 0;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 33 33 33;
-    --foreground: 255 255 255;
-    --card: 33 33 33;
-    --card-foreground: 255 255 255;
-    --popover: 33 33 33;
-    --popover-foreground: 255 255 255;
-    --primary: 255 255 255;
-    --primary-foreground: 33 33 33;
-    --secondary: 66 66 66;
+    --background: 31 41 51;
+    --foreground: 245 247 250;
+    --card: 31 41 51;
+    --card-foreground: 245 247 250;
+    --popover: 31 41 51;
+    --popover-foreground: 245 247 250;
+    --primary: 255 208 145;
+    --primary-foreground: 51 27 0;
+    --secondary: 82 96 109;
     --secondary-foreground: 255 255 255;
-    --muted: 66 66 66;
-    --muted-foreground: 163 163 163;
-    --accent: 66 66 66;
-    --accent-foreground: 255 255 255;
-    --destructive: 127 29 29;
+    --muted: 62 76 89;
+    --muted-foreground: 154 165 177;
+    --accent: 255 165 102;
+    --accent-foreground: 51 27 0;
+    --destructive: 185 28 28;
     --destructive-foreground: 255 255 255;
-    --border: 66 66 66;
-    --input: 66 66 66;
-    --ring: 163 163 163;
+    --border: 62 76 89;
+    --input: 62 76 89;
+    --ring: 255 136 0;
   }
 }
 
@@ -54,9 +54,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    background-color: #FAF9F6;
-    color: #2D3E50;
+    @apply text-foreground;
+    background-color: #FFFFFF;
     font-family: 'Inter', sans-serif;
   }
 }
@@ -80,42 +79,50 @@
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(45, 62, 80, 0.1);
+  box-shadow: 0 8px 20px rgba(211, 84, 0, 0.1);
+  border-color: rgba(211, 84, 0, 0.2);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #D35400 0%, #E67E22 100%);
-  color: white;
+  background: linear-gradient(135deg, #FFD091 0%, #FFA02B 100%);
+  color: #331B00;
   border: none;
+  box-shadow: 0 2px 10px rgba(255, 136, 0, 0.15);
   transition: all 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, #B8450A 0%, #D35400 100%);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, #FFE0B3 0%, #FFB85E 100%);
+  box-shadow: 0 4px 15px rgba(255, 136, 0, 0.25);
+  transform: translateY(-2px);
 }
 
 .category-card {
   background: #FFFFFF;
   border-radius: 12px;
   transition: all 0.3s ease;
-  border: 1px solid #F0EBE3;
+  border: 1px solid #E4E7EB;
+  box-shadow: 0 2px 8px rgba(31, 41, 51, 0.05);
 }
 
 .category-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(45, 62, 80, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(255, 136, 0, 0.12);
+  border-color: rgba(255, 208, 145, 0.5);
 }
 
 .product-card {
   background: #FFFFFF;
   border-radius: 8px;
   transition: all 0.3s ease;
-  border: 1px solid #F0EBE3;
+  border: 1px solid #E4E7EB;
+  box-shadow: 0 2px 8px rgba(31, 41, 51, 0.05);
 }
 
 .product-card:hover {
-  box-shadow: 0 4px 12px rgba(45, 62, 80, 0.08);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(255, 136, 0, 0.12);
+  border-color: rgba(255, 208, 145, 0.5);
 }
 
 .filter-section {
@@ -125,14 +132,93 @@
 }
 
 .price-badge {
-  background: linear-gradient(135deg, #D35400 0%, #E67E22 100%);
-  color: white;
+  background: linear-gradient(135deg, #FFD091 0%, #FFA02B 100%);
+  color: #331B00;
   font-weight: 600;
+  box-shadow: 0 2px 6px rgba(255, 136, 0, 0.2);
 }
 
 .discount-badge {
-  background: #E67E22;
+  background: linear-gradient(135deg, #FF8800 0%, #CC5400 100%);
   color: white;
   font-size: 0.75rem;
   font-weight: 600;
+  box-shadow: 0 2px 6px rgba(255, 105, 0, 0.25);
+}
+
+.text-primary {
+  color: #FF8800;
+}
+
+/* Новые стили для заголовков */
+h1, h2, h3, h4, h5, h6 {
+  color: #1F2933;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2.5rem;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 2rem;
+  letter-spacing: -0.0125em;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+/* Стили для иконок */
+.icon-primary {
+  color: #FF8800;
+  filter: drop-shadow(0 1px 2px rgba(255, 136, 0, 0.2));
+}
+
+/* Стили для кнопок с градиентом */
+.btn-gradient {
+  background: linear-gradient(135deg, #FFD091 0%, #FFA02B 100%);
+  color: #331B00;
+  border: none;
+  box-shadow: 0 2px 10px rgba(255, 136, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #FFE0B3 0%, #FFB85E 100%);
+  box-shadow: 0 4px 15px rgba(255, 136, 0, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Премиальные стили */
+.premium-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF9E6 100%);
+  border: 1px solid rgba(255, 195, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(255, 136, 0, 0.08);
+  border-radius: 12px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.premium-card:hover {
+  box-shadow: 0 15px 35px rgba(255, 136, 0, 0.15);
+  transform: translateY(-5px);
+}
+
+.premium-text {
+  background: linear-gradient(135deg, #FF8800 0%, #FFC300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.premium-border {
+  border: 1px solid;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(135deg, #FFD091 0%, #FFA02B 100%);
+}
+
+.premium-shadow {
+  box-shadow: 0 8px 30px rgba(255, 136, 0, 0.12);
 }
