@@ -1,35 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import Link from 'next/link';
-import { api } from '@/lib/api';
-import { Category } from '@/types/product';
+import { useCategories } from '@/contexts/CategoriesContext';
 
 const Footer = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
+  const { categories } = useCategories(); // Use the categories context
   const currentYear = new Date().getFullYear();
-
-  // Load categories on mount with caching
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await api.categories.getAll();
-        setCategories(response.filter(c => c.isActive));
-      } catch (error) {
-        console.error('Failed to load categories:', error);
-        // Use fallback categories if API call fails
-        setCategories([
-          { _id: 'glasses', name: 'Очки', slug: 'glasses', isActive: true, sortOrder: 1, level: 1 },
-          { _id: 'clothing', name: 'Одежда', slug: 'clothing', isActive: true, sortOrder: 2, level: 1 },
-          { _id: 'shoes', name: 'Обувь', slug: 'shoes', isActive: true, sortOrder: 3, level: 1 },
-          { _id: 'accessories', name: 'Аксессуары', slug: 'accessories', isActive: true, sortOrder: 4, level: 1 }
-        ]);
-      }
-    };
-
-    loadCategories();
-  }, []);
 
   return (
     <footer className="bg-white border-t border-secondary-100 shadow-sm">
@@ -144,4 +121,5 @@ const Footer = () => {
   );
 };
 
+export { Footer };
 export default Footer;

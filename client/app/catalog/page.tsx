@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Star, Heart, Eye, Search } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useCategories } from '@/hooks/useCategories';
+import { useCategories } from '@/contexts/CategoriesContext';
 import { useProducts, useFilteredProducts } from '@/hooks/useProducts';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -29,7 +29,7 @@ const CatalogPage = () => {
   });
   
   const { toggleFavorite, isFavorite, isLoggedIn, showAuthModal, setShowAuthModal } = useFavorites();
-  const { categories, loading: categoriesLoading } = useCategories();
+  const { categories, isLoading: categoriesLoading } = useCategories();
   const { products, loading: productsLoading, error } = useProducts();
 
   // Используем товары из основного хука
@@ -134,7 +134,7 @@ const CatalogPage = () => {
                         <div className="absolute top-4 left-4 flex flex-col space-y-2">
                           {product.isBrandNew && (
                             <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
-                              NEW
+                              НОВОЕ
                             </span>
                           )}
                           {product.isOnSale && (

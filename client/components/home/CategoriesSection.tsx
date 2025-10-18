@@ -3,14 +3,14 @@
 import { Button } from '@/components/ui/button';
 import { Eye, Shirt, Footprints, Gem, Percent, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { useCategories } from '@/hooks/useCategories';
+import { useCategories } from '@/contexts/CategoriesContext';
 import { OptimizedImage } from '@/components/ui/OptimizedImage';
 import { Category } from '@/types/product';
 
 const CategoriesSection = () => {
-  const { categories, loading } = useCategories();
+  const { categories, isLoading } = useCategories();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -11,9 +11,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { Category, Product } from '@/types/product';
+import { Product } from '@/types/product';
 import Image from 'next/image';
 import { AuthModal } from '@/components/ui/AuthModal';
+import { useCategories } from '@/contexts/CategoriesContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,8 +23,8 @@ const Header = () => {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const { categories } = useCategories(); // Use the categories context
   const { items, totalQuantity } = useCart();
   const router = useRouter();
 
@@ -43,26 +44,6 @@ const Header = () => {
     checkAuthStatus();
   }, []);
 
-  // Cache categories to avoid repeated API calls
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await api.categories.getAll();
-        setCategories(response.filter(c => c.isActive));
-      } catch (error) {
-        console.error('Failed to load categories:', error);
-        // Use fallback categories if API call fails
-        setCategories([
-          { _id: 'glasses', name: 'Очки', slug: 'glasses', isActive: true, sortOrder: 1, level: 1, categoryType: 'GLASSES' },
-          { _id: 'clothing', name: 'Одежда', slug: 'clothing', isActive: true, sortOrder: 2, level: 1, categoryType: 'CLOTHING' },
-          { _id: 'shoes', name: 'Обувь', slug: 'shoes', isActive: true, sortOrder: 3, level: 1, categoryType: 'SHOES' },
-          { _id: 'accessories', name: 'Аксессуары', slug: 'accessories', isActive: true, sortOrder: 4, level: 1, categoryType: 'ACCESSORIES' }
-        ]);
-      }
-    };
-
-    loadCategories();
-  }, []);
 
   // Handle instant search
   useEffect(() => {
@@ -263,64 +244,95 @@ const Header = () => {
 
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon" className="md:hidden hover:bg-primary-50 hover:text-primary-600 transition-all">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="w-80">
-                <div className="flex flex-col space-y-4 mt-8">
-                  <div className="relative mb-6">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <Input placeholder="Поиск товаров..." className="pl-10 placeholder:text-slate-700 focus:placeholder:text-slate-700/70" />
+              <SheetContent side="left" className="w-80 border-r border-secondary-100 shadow-lg bg-white">
+                <div className="flex flex-col h-full">
+                  {/* Logo */}
+                  <div className="flex items-center space-x-2 mb-8 pt-4">
+                    <div className="w-10 h-10 bg-gradient-to-br from-gold-300 to-primary-300 rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-primary-900 font-bold text-base">DB</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xl font-bold text-charcoal-800 tracking-tight">DV BERRY</span>
+                      <span className="text-xs text-charcoal-500 -mt-1">Premium Store</span>
+                    </div>
                   </div>
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="text-lg font-medium text-gray-600 hover:text-primary transition-colors duration-200 py-2 border-b border-gray-100"
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
-                  <div className="flex space-x-4 mt-8">
+                  
+                  {/* Search */}
+                  <div className="relative mb-8">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4" />
+                    <Input 
+                      placeholder="Поиск товаров..." 
+                      className="pl-10 bg-secondary-50 border-secondary-200 focus:border-primary-300 focus:ring-primary-200 focus:bg-white placeholder:text-secondary-400 focus:placeholder:text-secondary-500 rounded-full shadow-sm"
+                    />
+                  </div>
+                  
+                  {/* Navigation */}
+                  <div className="space-y-1 mb-8">
+                    <h3 className="font-heading text-sm font-semibold mb-3 text-charcoal-500 uppercase tracking-wider px-1">
+                      Каталог
+                    </h3>
+                    {navigation.map((item) => (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        className="flex items-center py-2.5 px-3 text-base font-medium text-charcoal-700 hover:text-primary-500 hover:bg-primary-50 rounded-lg transition-colors duration-200"
+                      >
+                        {item.name}
+                      </Link>
+                    ))}
+                  </div>
+                  
+                  {/* User Actions */}
+                  <div className="mt-auto border-t border-secondary-100 pt-6 pb-8">
+                    <h3 className="font-heading text-sm font-semibold mb-3 text-charcoal-500 uppercase tracking-wider px-1">
+                      Аккаунт
+                    </h3>
                     {isLoggedIn ? (
-                      <>
-                        <Link href="/profile" className="flex-1">
-                          <Button variant="ghost" className="w-full">
-                            <User className="w-5 h-5 mr-2" />
+                      <div className="space-y-2">
+                        <Link href="/profile">
+                          <Button variant="ghost" className="w-full justify-start text-charcoal-700 hover:text-primary-500 hover:bg-primary-50 rounded-lg">
+                            <User className="w-5 h-5 mr-3 text-primary-400" />
                             Профиль
                           </Button>
                         </Link>
-                        <Link href="/favorites" className="flex-1">
-                          <Button variant="ghost" className="w-full">
-                            <Heart className="w-5 h-5 mr-2" />
+                        <Link href="/favorites">
+                          <Button variant="ghost" className="w-full justify-start text-charcoal-700 hover:text-primary-500 hover:bg-primary-50 rounded-lg">
+                            <Heart className="w-5 h-5 mr-3 text-accent-400" />
                             Избранное
                           </Button>
                         </Link>
-                        <Button variant="ghost" onClick={handleLogout} className="flex-1">
-                          <LogOut className="w-5 h-5 mr-2" />
+                        <Button 
+                          variant="ghost" 
+                          onClick={handleLogout} 
+                          className="w-full justify-start text-charcoal-700 hover:text-primary-500 hover:bg-primary-50 rounded-lg"
+                        >
+                          <LogOut className="w-5 h-5 mr-3 text-charcoal-400" />
                           Выйти
                         </Button>
-                      </>
+                      </div>
                     ) : (
-                      <>
+                      <div className="space-y-2">
                         <Button
                           variant="ghost"
-                          className="flex-1"
+                          className="w-full justify-start text-charcoal-700 hover:text-primary-500 hover:bg-primary-50 rounded-lg"
                           onClick={() => setShowAuthModal(true)}
                         >
-                          <User className="w-5 h-5 mr-2" />
+                          <User className="w-5 h-5 mr-3 text-primary-400" />
                           Войти
                         </Button>
                         <Button
                           variant="ghost"
-                          className="flex-1"
+                          className="w-full justify-start text-charcoal-700 hover:text-primary-500 hover:bg-primary-50 rounded-lg"
                           onClick={() => setShowAuthModal(true)}
                         >
-                          <Heart className="w-5 h-5 mr-2" />
+                          <Heart className="w-5 h-5 mr-3 text-accent-400" />
                           Избранное
                         </Button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -339,4 +351,5 @@ const Header = () => {
   );
 };
 
+export { Header };
 export default Header;

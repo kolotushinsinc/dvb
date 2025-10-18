@@ -111,7 +111,7 @@ const FavoritesPage = () => {
                   <div className="absolute top-4 left-4 flex flex-col space-y-2">
                     {product.isBrandNew && (
                       <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                        NEW
+                        НОВОЕ
                       </span>
                     )}
                     {product.isOnSale && (

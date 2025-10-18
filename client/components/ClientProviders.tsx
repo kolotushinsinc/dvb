@@ -3,6 +3,7 @@
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AnimationProvider } from '@/components/ui/Animation';
 import { CartProvider } from '@/components/cart/CartProvider';
+import { CategoriesProvider } from '@/contexts/CategoriesContext';
 import { Toaster } from '@/components/ui/sonner';
 
 interface ClientProvidersProps {
@@ -13,10 +14,12 @@ export function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <ErrorBoundary>
       <AnimationProvider>
-        <CartProvider>
-          {children}
-          <Toaster />
-        </CartProvider>
+        <CategoriesProvider>
+          <CartProvider>
+            {children}
+            <Toaster />
+          </CartProvider>
+        </CategoriesProvider>
       </AnimationProvider>
     </ErrorBoundary>
   );

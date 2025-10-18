@@ -1,20 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
+import { useCategories } from '@/contexts/CategoriesContext';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, Heart, Eye, Filter, X } from 'lucide-react';
+import { Star, Heart, Eye, Filter, X, Search } from 'lucide-react';
+import { UniversalFilters } from '@/components/catalog/UniversalFilters';
 import { useFavorites } from '@/hooks/useFavorites';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { Product, Category } from '@/types/product';
 import { FadeIn, SlideIn } from '@/components/ui/Animation';
-import { PageLoader, ProductCardSkeleton } from '@/components/ui/Loader';
+import { Loader } from '@/components/ui/Loader';
 import { ErrorDisplay, NetworkError } from '@/components/ErrorDisplay';
 import { AuthModal } from '@/components/ui/AuthModal';
 import { ProductQuickView } from '@/components/product/ProductQuickView';
@@ -22,14 +24,13 @@ import { ProductQuickView } from '@/components/product/ProductQuickView';
 const SalePage = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
-  const [categoriesState, setCategoriesState] = useState<Category[]>([]);
+  const { categories: categoriesState } = useCategories();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [priceRange, setPriceRange] = useState([0, 15000]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('discount');
-  const [showFilters, setShowFilters] = useState(false);
   const { toggleFavorite, isFavorite, isLoggedIn, showAuthModal, setShowAuthModal } = useFavorites();
 
   // Load products on mount
@@ -38,20 +39,10 @@ const SalePage = () => {
       try {
         setLoading(true);
         
-        // Загружаем категории и товары параллельно
-        const [categoriesResponse, productsResponse] = await Promise.all([
-          api.categories.getAll(),
-          api.products.getAll()
-        ]);
+        // Загружаем товары
+        const productsResponse = await api.products.getAll();
         
-        console.log('Categories response:', categoriesResponse);
         console.log('Products response:', productsResponse);
-        
-        // Фильтруем только активные категории
-        const activeCategories = categoriesResponse.filter(c => c.isActive);
-        
-        // Сохраняем все активные категории в состояние
-        setCategoriesState(activeCategories);
         
         // Получаем все товары из ответа API
         let allProducts = [];
@@ -137,7 +128,7 @@ const SalePage = () => {
         setSelectedCategories([]);
         
         console.log('All sale products loaded:', saleProducts.length);
-        console.log('Active categories:', activeCategories.length);
+        console.log('Active categories:', categoriesState.length);
         setError(null);
       } catch (err) {
         setError('Не удалось загрузить товары');
@@ -335,110 +326,29 @@ const SalePage = () => {
     setSortBy('discount');
   };
 
-  const FilterSection = () => (
-    <div className="space-y-8">
-      {/* Price Range */}
-      <div>
-        <h3 className="font-heading text-lg font-semibold mb-4">Цена</h3>
-        <div className="space-y-4">
-          <Slider
-            value={priceRange}
-            onValueChange={setPriceRange}
-            max={15000}
-            step={100}
-            className="w-full"
-          />
-          <div className="flex justify-between text-sm text-gray-600">
-            <span>{formatPrice(priceRange[0])}</span>
-            <span>{formatPrice(priceRange[1])}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Categories */}
-      <div>
-        <h3 className="font-heading text-lg font-semibold mb-4">Категории</h3>
-        <div className="space-y-3">
-          {categories.map(category => {
-            const categoryFromState = categoriesState.find(c => c._id === category.id);
-            return (
-              <div key={category.id} className="flex items-center space-x-3">
-                <Checkbox
-                  id={category.id}
-                  checked={selectedCategories.includes(category.id)}
-                  onCheckedChange={(checked) => handleCategoryChange(category.id, checked as boolean)}
-                />
-                <label
-                  htmlFor={category.id}
-                  className="flex-1 text-sm cursor-pointer hover:text-primary transition-colors"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // Use the improved category click handler
-                    if (categoryFromState) {
-                      handleCategoryClick(categoryFromState.slug);
-                    }
-                  }}
-                >
-                  {category.name}
-                  <span className="text-gray-400 ml-1">({category.count})</span>
-                </label>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Countries */}
-      <div>
-        <h3 className="font-heading text-lg font-semibold mb-4">Страна производитель</h3>
-        <div className="space-y-3">
-          {countries.map(country => (
-            <div key={country.id} className="flex items-center space-x-3">
-              <Checkbox
-                id={country.id || ''}
-                checked={country.id ? selectedCountries.includes(country.id) : false}
-                onCheckedChange={(checked) => country.id && handleCountryChange(country.id, checked as boolean)}
-              />
-              <label
-                htmlFor={country.id || ''}
-                className="flex-1 text-sm cursor-pointer"
-              >
-                {country.name}
-                <span className="text-gray-400 ml-1">({country.count})</span>
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Clear Filters */}
-      <Button
-        onClick={clearFilters}
-        variant="outline"
-        className="w-full"
-      >
-        Очистить фильтры
-      </Button>
-    </div>
-  );
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-            Распродажа
+        <div className="mb-12 text-center md:text-left">
+          <div className="inline-block mb-4">
+            <span className="text-sm text-charcoal-500 uppercase tracking-wider font-medium bg-secondary-50 px-3 py-1 rounded-full">
+              Специальные предложения
+            </span>
+          </div>
+          <h1 className="font-display text-3xl lg:text-5xl font-bold text-charcoal-800 mb-4 tracking-tight">
+            Распродажа <span className="premium-text">коллекция</span>
             {selectedCategories.length > 0 && (
-              <span className="text-xl font-normal text-gray-600 ml-4">
+              <span className="text-2xl font-normal text-charcoal-600 ml-4">
                 ({categories.find(c => selectedCategories.includes(c.id))?.name})
               </span>
             )}
           </h1>
-          <p className="text-lg text-gray-600">
-            Найдено товаров: {filteredProducts && Array.isArray(filteredProducts) ? filteredProducts.length : 0}
+          <p className="text-lg text-charcoal-600 max-w-2xl md:mx-0 mx-auto">
+            Найдено товаров: <span className="font-semibold">{filteredProducts && Array.isArray(filteredProducts) ? filteredProducts.length : 0}</span>
             {selectedCategories.length === 0 && (
               <span className="ml-2">(показаны все категории)</span>
             )}
@@ -446,44 +356,27 @@ const SalePage = () => {
         </div>
 
         <div className="flex gap-8">
-          {/* Mobile Filter Toggle */}
-          <div className="lg:hidden fixed bottom-4 right-4 z-50">
-            <Button
-              onClick={() => setShowFilters(!showFilters)}
-              className="rounded-full shadow-lg"
-              size="lg"
-            >
-              <Filter className="w-5 h-5" />
-            </Button>
-          </div>
 
-          {/* Filters Sidebar */}
-          <div className={`${showFilters ? 'fixed inset-0 z-40 bg-white p-6 lg:relative lg:inset-auto lg:z-auto lg:bg-transparent lg:p-0' : 'hidden'} lg:block w-full lg:w-80 lg:flex-shrink-0`}>
-            {showFilters && (
-              <div className="lg:hidden flex justify-between items-center mb-6">
-                <h2 className="font-heading text-xl font-bold">Фильтры</h2>
-                <Button
-                  onClick={() => setShowFilters(false)}
-                  variant="ghost"
-                  size="icon"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-            )}
-            <div className="lg:bg-white lg:rounded-2xl lg:p-6 lg:shadow-sm">
-              <FilterSection />
-            </div>
-          </div>
+          {/* Universal Filters Component */}
+          <UniversalFilters
+            categories={categoriesState}
+            products={products}
+            onFilterChange={(filters) => {
+              setSelectedCategories(filters.selectedCategories);
+              setPriceRange(filters.priceRange);
+              setSelectedCountries(filters.selectedCountries);
+              applyFilters();
+            }}
+          />
 
           {/* Main Content */}
           <div className="flex-1">
             {/* Sort Controls */}
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center space-x-4">
-                <span className="text-gray-600">Сортировать:</span>
+                <span className="text-charcoal-600">Сортировать:</span>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-48 border-secondary-200 bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -498,14 +391,21 @@ const SalePage = () => {
               </div>
 
               {/* Apply Filters Button */}
-              <Button onClick={applyFilters} className="lg:hidden">
+              <Button 
+                onClick={applyFilters} 
+                className="lg:hidden bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 shadow-lg hover:shadow-xl"
+              >
                 Применить фильтры
               </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {loading ? (
-                <ProductCardSkeleton count={6} />
+                Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-secondary-100 h-[400px] flex items-center justify-center">
+                    <Loader size="lg" text="Загрузка..." />
+                  </div>
+                ))
               ) : error ? (
                 <div className="col-span-full">
                   <NetworkError onRetry={() => window.location.reload()} />
@@ -513,26 +413,26 @@ const SalePage = () => {
               ) : filteredProducts && Array.isArray(filteredProducts) && filteredProducts.length > 0 ? (
                 filteredProducts.map((product, index) => (
                   <SlideIn key={product._id} delay={index * 50}>
-                    <div className="group bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden">
+                    <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-secondary-100 premium-shadow">
                       {/* Product Image */}
-                      <div className="relative overflow-hidden bg-gray-100 h-64">
+                      <div className="relative overflow-hidden bg-secondary-50 h-72">
                         <Link href={`/product/${product.slug}`}>
                           <img
                             src={product.mainImage || '/placeholder-product.jpg'}
                             alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         </Link>
                         
                         {/* Badges */}
                         <div className="absolute top-4 left-4 flex flex-col space-y-2">
                           {product.isBrandNew && (
-                            <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-                              NEW
+                            <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
+                              НОВОЕ
                             </span>
                           )}
                           {product.isOnSale && product.originalPrice && (
-                            <span className="bg-accent text-white text-xs px-2 py-1 rounded-full font-semibold">
+                            <span className="bg-gradient-to-r from-accent-500 to-accent-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
                               -{calculateDiscountPercentage(product.originalPrice, product.price)}%
                             </span>
                           )}
@@ -543,31 +443,33 @@ const SalePage = () => {
                           <Button
                             size="icon"
                             variant="secondary"
-                            className={`w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md ${
-                              isFavorite(product._id) ? 'text-red-500 hover:text-red-600' : 'text-gray-600 hover:text-red-500'
+                            className={`w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl ${
+                              isFavorite(product._id) 
+                                ? 'text-accent-500 hover:text-accent-600 hover:scale-110 transition-all duration-300' 
+                                : 'text-charcoal-600 hover:text-accent-500 hover:scale-110 transition-all duration-300'
                             }`}
                             onClick={(e) => handleToggleFavorite(product, e)}
                           >
-                            <Heart className={`w-4 h-4 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
+                            <Heart className={`w-5 h-5 ${isFavorite(product._id) ? 'fill-current' : ''}`} />
                           </Button>
                           <ProductQuickView product={product}>
                             <Button
                               size="icon"
                               variant="secondary"
-                              className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-md text-gray-600 hover:text-blue-500"
+                              className="w-11 h-11 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white shadow-lg hover:shadow-xl text-charcoal-600 hover:text-primary-500 hover:scale-110 transition-all duration-300"
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                               }}
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-5 h-5" />
                             </Button>
                           </ProductQuickView>
                         </div>
 
                         {/* Country Origin */}
                         <div className="absolute bottom-4 left-4">
-                          <span className="bg-white/90 backdrop-blur-sm text-gray-700 text-xs px-3 py-1 rounded-full font-medium">
+                          <span className="bg-white/90 backdrop-blur-sm text-charcoal-700 text-xs px-4 py-1.5 rounded-full font-medium shadow-sm border border-white/50">
                             {product.country}
                           </span>
                         </div>
@@ -576,32 +478,35 @@ const SalePage = () => {
                       {/* Product Info */}
                       <div className="p-6">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
+                          <span className="text-sm text-charcoal-500 uppercase tracking-wider font-medium bg-secondary-50 px-3 py-1 rounded-full">
                             {product.categoryId ? product.categoryId.name : (product.category ? product.category.name : '')}
                           </span>
-                          <div className="flex items-center space-x-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm text-gray-600">{product.rating || 0}</span>
-                            <span className="text-sm text-gray-400">({product.reviewsCount || 0})</span>
+                          <div className="flex items-center space-x-1 bg-gold-50 px-2 py-1 rounded-full">
+                            <Star className="w-4 h-4 fill-gold-500 text-gold-500" />
+                            <span className="text-sm text-charcoal-700 font-medium">{product.rating || 4.5}</span>
+                            <span className="text-sm text-charcoal-500">({product.reviewsCount || 12})</span>
                           </div>
                         </div>
 
                         <Link href={`/product/${product.slug}`}>
-                          <h3 className="font-heading text-lg font-bold text-gray-900 mb-3 group-hover:text-primary transition-colors">
+                          <h3 className="font-heading text-lg font-bold text-charcoal-800 mb-3 group-hover:text-primary-500 transition-colors line-clamp-2 h-14">
                             {product.name}
                           </h3>
                         </Link>
 
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between mt-4 pt-4 border-t border-secondary-100">
                           <div className="flex items-center space-x-2">
-                            <span className="text-xl font-bold text-primary">
+                            <span className="text-xl font-bold text-charcoal-800">
                               {formatPrice(product.price)}
                             </span>
                             {product.originalPrice && (
-                              <span className="text-sm text-gray-500 line-through">
+                              <span className="text-sm text-charcoal-500 line-through">
                                 {formatPrice(product.originalPrice)}
                               </span>
                             )}
+                          </div>
+                          <div className="w-8 h-8 rounded-full bg-primary-50 group-hover:bg-primary-100 flex items-center justify-center transition-all">
+                            <span className="text-sm text-primary-500 group-hover:text-primary-600">→</span>
                           </div>
                         </div>
                       </div>
@@ -609,13 +514,25 @@ const SalePage = () => {
                   </SlideIn>
                 ))
               ) : (
-                <div className="col-span-full text-center py-12">
-                  <p className="text-gray-500 text-lg mb-4">
-                    Товары со скидкой не найдены
-                  </p>
-                  <p className="text-gray-400 text-sm">
-                    Попробуйте изменить параметры фильтрации или обновить страницу
-                  </p>
+                <div className="col-span-full text-center py-16 bg-white rounded-2xl shadow-lg border border-secondary-100 premium-card">
+                  <div className="max-w-md mx-auto">
+                    <div className="w-20 h-20 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <Search className="w-10 h-10 text-secondary-300" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-charcoal-800 mb-4">
+                      Товары со скидкой не найдены
+                    </h3>
+                    <p className="text-charcoal-600 mb-8">
+                      Попробуйте изменить параметры фильтрации или обновить страницу
+                    </p>
+                    <Button 
+                      variant="outline"
+                      onClick={clearFilters}
+                      className="border-2 border-secondary-200 hover:border-primary-300 px-6 py-2"
+                    >
+                      Сбросить фильтры
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

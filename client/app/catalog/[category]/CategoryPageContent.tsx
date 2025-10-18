@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Star, Heart, Eye, ShoppingCart, Search } from 'lucide-react';
 import { useCart } from '@/components/cart/CartProvider';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useCategories } from '@/hooks/useCategories';
+import { useCategories } from '@/contexts/CategoriesContext';
 import { useProducts, useFilteredProducts } from '@/hooks/useProducts';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -35,7 +35,7 @@ function CategoryPageContent() {
   const [error, setError] = useState<string | null>(null);
   const { addItem } = useCart();
   const { toggleFavorite, isFavorite, isLoggedIn, showAuthModal, setShowAuthModal } = useFavorites();
-  const { categories, loading: categoriesLoading } = useCategories();
+  const { categories, isLoading: categoriesLoading } = useCategories();
   const { products, loading: productsLoading } = useProducts({ category: categorySlug });
   
   // Function to clear filters
@@ -185,7 +185,7 @@ function CategoryPageContent() {
                         <div className="absolute top-4 left-4 flex flex-col space-y-2">
                           {product.isBrandNew && (
                             <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
-                              NEW
+                                                                            НОВОЕ
                             </span>
                           )}
                           {product.isOnSale && (

@@ -300,7 +300,7 @@ export default function ProductPageContent() {
                 <div className="absolute top-4 left-4 flex flex-col space-y-2 z-10">
                   {product.isBrandNew && (
                     <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
-                      NEW
+                      НОВОЕ
                     </span>
                   )}
                   {product.isOnSale && (
@@ -707,7 +707,7 @@ export default function ProductPageContent() {
                           <div className="absolute top-4 left-4 flex flex-col space-y-2">
                             {product.isBrandNew && (
                               <span className="bg-gradient-to-r from-gold-400 to-gold-600 text-white text-xs px-3 py-1 rounded-full font-semibold shadow-md">
-                                NEW
+                                НОВОЕ
                               </span>
                             )}
                             {product.isOnSale && (
