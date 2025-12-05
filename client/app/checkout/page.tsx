@@ -119,6 +119,7 @@ const CheckoutPage = () => {
       const orderItems = items.map(item => ({
         productId: item.product._id,
         quantity: item.quantity,
+        price: item.product.price,
         size: item.size,
         color: item.color
       }));
@@ -129,13 +130,19 @@ const CheckoutPage = () => {
         address: formData.address,
         city: formData.city,
         state: formData.state,
-        postalCode: formData.postalCode,
-        country: formData.country,
-        phone: formData.phone
+        zip: formData.postalCode,
+        country: formData.country
       };
       
       // Create order
-      const order = await api.orders.create(orderItems, shippingAddress);
+      const response = await api.orders.create(
+        orderItems, 
+        shippingAddress, 
+        formData.email,
+        formData.phone
+      );
+      
+      const order = response.success && response.data?.order ? response.data.order : response;
       
       // Clear cart
       await clearCart();

@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AnimationProvider } from '@/components/ui/Animation';
 import { CartProvider } from '@/components/cart/CartProvider';
 import { CategoriesProvider } from '@/contexts/CategoriesContext';
+import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/sonner';
 
 interface ClientProvidersProps {
@@ -13,14 +14,16 @@ interface ClientProvidersProps {
 export function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <ErrorBoundary>
-      <AnimationProvider>
-        <CategoriesProvider>
-          <CartProvider>
-            {children}
-            <Toaster />
-          </CartProvider>
-        </CategoriesProvider>
-      </AnimationProvider>
+      <AuthProvider>
+        <AnimationProvider>
+          <CategoriesProvider>
+            <CartProvider>
+              {children}
+              <Toaster />
+            </CartProvider>
+          </CategoriesProvider>
+        </AnimationProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

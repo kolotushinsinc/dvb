@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Product, CartItem } from '@/types/product';
 import { api, CartItem as APICartItem } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CartContextType {
   items: CartItem[];
@@ -34,35 +35,31 @@ interface CartProviderProps {
 }
 
 export const CartProvider = ({ children }: CartProviderProps) => {
+  const { isAuthenticated } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check if user is logged in
-  useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const response = await api.auth.getProfile().catch(() => null);
-        setIsLoggedIn(!!response);
-      } catch (error) {
-        setIsLoggedIn(false);
-      }
-    };
-
-    checkAuthStatus();
-  }, []);
-
-  // Load cart from API on mount or when login status changes
+  // Load cart from API on mount or when auth status changes
   useEffect(() => {
     const loadCart = async () => {
       try {
         setLoading(true);
         
-        if (isLoggedIn) {
+        if (isAuthenticated) {
           // Load from API if user is logged in
-          const cartResponse = await api.cart.get();
-          setItems(cartResponse.items.map(convertAPIToLocalCartItem));
+          try {
+            const cartResponse = await api.cart.get();
+            setItems(cartResponse.items.map(convertAPIToLocalCartItem));
+          } catch (err) {
+            console.error('Failed to load cart from API:', err);
+            // Fallback to localStorage
+            const localCart = localStorage.getItem('cart');
+            if (localCart) {
+              const parsedCart = JSON.parse(localCart);
+              setItems(parsedCart);
+            }
+          }
         } else {
           // Load from localStorage if user is not logged in
           const localCart = localStorage.getItem('cart');
@@ -74,28 +71,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         
         setError(null);
       } catch (err) {
-        // If API call fails and user is not logged in, try localStorage
-        if (!isLoggedIn) {
-          const localCart = localStorage.getItem('cart');
-          if (localCart) {
-            const parsedCart = JSON.parse(localCart);
-            setItems(parsedCart);
-            setError(null);
-          } else {
-            setError('Не удалось загрузить корзину');
-            console.error('Error loading cart:', err);
-          }
-        } else {
-          setError('Не удалось загрузить корзину');
-          console.error('Error loading cart:', err);
-        }
+        setError('Не удалось загрузить корзину');
+        console.error('Error loading cart:', err);
       } finally {
         setLoading(false);
       }
     };
 
     loadCart();
-  }, [isLoggedIn]);
+  }, [isAuthenticated]);
 
   // Convert API cart item to local type
   const convertAPIToLocalCartItem = (item: APICartItem): CartItem => ({
@@ -113,7 +97,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     try {
       setLoading(true);
       
-      if (isLoggedIn) {
+      if (isAuthenticated) {
         const cartResponse = await api.cart.get();
         setItems(cartResponse.items.map(convertAPIToLocalCartItem));
       } else {
@@ -138,7 +122,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       console.log('addItem called with:', { productId: product._id, quantity, size, color });
       console.log('Current items before adding:', items);
       
-      if (isLoggedIn) {
+      if (isAuthenticated) {
         await api.cart.add(product._id, quantity, size, color);
         await refreshCart();
       } else {
@@ -193,7 +177,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
   const removeItem = async (id: string, size?: string, color?: string) => {
     try {
-      if (isLoggedIn) {
+      if (isAuthenticated) {
         await api.cart.remove(id, size, color);
         await refreshCart();
       } else {
@@ -213,7 +197,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
   const updateQuantity = async (id: string, quantity: number, size?: string, color?: string) => {
     try {
-      if (isLoggedIn) {
+      if (isAuthenticated) {
         await api.cart.update(id, quantity, size, color);
         await refreshCart();
       } else {
@@ -236,7 +220,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
   const clearCart = async () => {
     try {
-      if (isLoggedIn) {
+      if (isAuthenticated) {
         await api.cart.clear();
         await refreshCart();
       } else {

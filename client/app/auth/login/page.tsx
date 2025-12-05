@@ -11,11 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const LoginPage = () => {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -62,7 +63,7 @@ const LoginPage = () => {
     
     try {
       setLoading(true);
-      await api.auth.login(formData.email, formData.password);
+      await login(formData.email, formData.password);
       toast.success('Вы успешно вошли в систему');
       router.push('/profile');
     } catch (err: any) {

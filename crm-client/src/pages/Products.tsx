@@ -56,7 +56,8 @@ export const Products = () => {
     seoDescription: '',
     features: [] as string[],
     variants: [] as { type: 'SIZE' | 'COLOR' | 'MATERIAL' | 'STYLE' | 'SEASON' | 'TECHNOLOGY'; value: string; price?: string; stock?: string }[],
-    attributes: {} as any
+    attributes: {} as any,
+    videoLinks: [] as string[]
   });
 
   // Получаем цвет из атрибутов для использования в цветовых вариантах
@@ -108,11 +109,13 @@ export const Products = () => {
     seoDescription: '',
     features: [] as string[],
     variants: [] as { type: 'SIZE' | 'COLOR' | 'MATERIAL' | 'STYLE' | 'SEASON' | 'TECHNOLOGY'; value: string; price?: string; stock?: string }[],
-    attributes: {} as any
+    attributes: {} as any,
+    videoLinks: [] as string[]
   });
 
   const [newFeature, setNewFeature] = useState('');
   const [newVariant, setNewVariant] = useState({ type: 'SIZE' as 'SIZE' | 'COLOR' | 'MATERIAL' | 'STYLE' | 'SEASON' | 'TECHNOLOGY', value: '', price: '', stock: '' });
+  const [newVideoLink, setNewVideoLink] = useState('');
 
   const queryClient = useQueryClient();
 
@@ -232,7 +235,8 @@ export const Products = () => {
         price: v.price?.toString() || '',
         stock: v.stock?.toString() || ''
       })) || [],
-      attributes: fullProduct.attributes || {}
+      attributes: fullProduct.attributes || {},
+      videoLinks: fullProduct.videoLinks || []
     });
     setShowEditModal(true);
   };
@@ -261,7 +265,8 @@ export const Products = () => {
       seoDescription: '',
       features: [],
       variants: [],
-      attributes: {}
+      attributes: {},
+      videoLinks: []
     });
   };
 
@@ -359,8 +364,10 @@ export const Products = () => {
         ...v,
         price: v.price ? parseFloat(v.price) : undefined,
         stock: v.stock ? parseInt(v.stock) : undefined
-      }))
+      })),
+      videoLinks: editFormData.videoLinks // Explicitly include videoLinks
     };
+    
     updateProductMutation.mutate({ id: selectedProduct._id, data: productData as any });
   };
 
@@ -999,6 +1006,50 @@ export const Products = () => {
               />
             </div>
             
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Видео Rutube</label>
+              <div className="space-y-2">
+                {createFormData.videoLinks.map((link, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="url"
+                      className="flex-1 rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      value={link}
+                      onChange={(e) => {
+                        const newLinks = [...createFormData.videoLinks];
+                        newLinks[index] = e.target.value;
+                        handleCreateFormChange('videoLinks', newLinks);
+                      }}
+                      placeholder="https://rutube.ru/video/..."
+                    />
+                    <Button type="button" variant="outline" onClick={() => {
+                      const newLinks = createFormData.videoLinks.filter((_, i) => i !== index);
+                      handleCreateFormChange('videoLinks', newLinks);
+                    }}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="flex space-x-2">
+                  <input
+                    type="url"
+                    className="flex-1 rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    value={newVideoLink}
+                    onChange={(e) => setNewVideoLink(e.target.value)}
+                    placeholder="https://rutube.ru/video/..."
+                  />
+                  <Button type="button" variant="outline" onClick={() => {
+                    if (newVideoLink.trim()) {
+                      handleCreateFormChange('videoLinks', [...createFormData.videoLinks, newVideoLink.trim()]);
+                      setNewVideoLink('');
+                    }
+                  }}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center">
                 <input
@@ -1426,6 +1477,50 @@ export const Products = () => {
                 onChange={(attributes) => handleEditFormChange('attributes', attributes)}
                 variants={editFormData.variants}
               />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Видео Rutube</label>
+              <div className="space-y-2">
+                {editFormData.videoLinks.map((link, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="url"
+                      className="flex-1 rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                      value={link}
+                      onChange={(e) => {
+                        const newLinks = [...editFormData.videoLinks];
+                        newLinks[index] = e.target.value;
+                        handleEditFormChange('videoLinks', newLinks);
+                      }}
+                      placeholder="https://rutube.ru/video/..."
+                    />
+                    <Button type="button" variant="outline" onClick={() => {
+                      const newLinks = editFormData.videoLinks.filter((_, i) => i !== index);
+                      handleEditFormChange('videoLinks', newLinks);
+                    }}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                <div className="flex space-x-2">
+                  <input
+                    type="url"
+                    className="flex-1 rounded-xl border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    value={newVideoLink}
+                    onChange={(e) => setNewVideoLink(e.target.value)}
+                    placeholder="https://rutube.ru/video/..."
+                  />
+                  <Button type="button" variant="outline" onClick={() => {
+                    if (newVideoLink.trim()) {
+                      handleEditFormChange('videoLinks', [...editFormData.videoLinks, newVideoLink.trim()]);
+                      setNewVideoLink('');
+                    }
+                  }}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

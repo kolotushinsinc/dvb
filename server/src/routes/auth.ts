@@ -58,9 +58,9 @@ router.post('/register', [
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' } as any
     );
 
-    // Send welcome email
-    try {
-      await sendEmail({
+    // Send welcome email (non-blocking)
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      sendEmail({
         to: user.email,
         subject: 'Добро пожаловать в DV BERRY!',
         html: `
@@ -77,9 +77,11 @@ router.post('/register', [
             <a href="${process.env.CLIENT_URL}" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Перейти в магазин</a>
           </div>
         `
+      }).catch(emailError => {
+        console.error('Failed to send welcome email:', emailError);
       });
-    } catch (emailError) {
-      console.error('Failed to send welcome email:', emailError);
+    } else {
+      console.log('Email not configured, skipping welcome email');
     }
 
     res.status(201).json({
@@ -201,22 +203,38 @@ router.post('/forgot-password', [
     );
 
     // Send reset email
-    await sendEmail({
-      to: user.email,
-      subject: 'Восстановление пароля DV BERRY',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #374151;">Восстановление пароля</h2>
-          <p>Здравствуйте${user.firstName ? `, ${user.firstName}` : ''}!</p>
-          <p>Вы запросили восстановление пароля для вашей учетной записи в DV BERRY.</p>
-          <p>Нажмите на ссылку ниже, чтобы создать новый пароль:</p>
-          <a href="${process.env.CLIENT_URL}/reset-password?token=${resetToken}" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Восстановить пароль</a>
-          <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
-            Ссылка действительна в течение 1 часа. Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.
-          </p>
-        </div>
-      `
-    });
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: 'Восстановление пароля DV BERRY',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #374151;">Восстановление пароля</h2>
+              <p>Здравствуйте${user.firstName ? `, ${user.firstName}` : ''}!</p>
+              <p>Вы запросили восстановление пароля для вашей учетной записи в DV BERRY.</p>
+              <p>Нажмите на ссылку ниже, чтобы создать новый пароль:</p>
+              <a href="${process.env.CLIENT_URL}/reset-password?token=${resetToken}" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Восстановить пароль</a>
+              <p style="margin-top: 20px; color: #6b7280; font-size: 14px;">
+                Ссылка действительна в течение 1 часа. Если вы не запрашивали восстановление пароля, просто проигнорируйте это письмо.
+              </p>
+            </div>
+          `
+        });
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+        return res.status(500).json({
+          success: false,
+          error: 'Failed to send password reset email. Please try again later.'
+        });
+      }
+    } else {
+      console.log('Email not configured, cannot send password reset email');
+      return res.status(500).json({
+        success: false,
+        error: 'Email service is not configured. Please contact support.'
+      });
+    }
 
     res.json({
       success: true,

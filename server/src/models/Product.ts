@@ -92,6 +92,7 @@ export interface IProduct extends Document {
   attributes: IProductAttributes; // Специфические атрибуты товара
   images: IProductImage[];
   variants: IProductVariant[];
+  videoLinks?: string[]; // Ссылки на видео Rutube
   createdAt: Date;
   updatedAt: Date;
 }
@@ -240,7 +241,11 @@ const productSchema = new Schema<IProduct>({
     required: true
   },
   images: [productImageSchema],
-  variants: [productVariantSchema]
+  variants: [productVariantSchema],
+  videoLinks: [{
+    type: String,
+    trim: true
+  }]
 }, {
   timestamps: true
 });

@@ -2,44 +2,45 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const useFavorites = () => {
+  const { isAuthenticated } = useAuth();
   const [favorites, setFavorites] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
-    const checkAuthAndLoadFavorites = async () => {
+    const loadFavorites = async () => {
+      if (!isAuthenticated) {
+        setLoading(false);
+        setFavorites([]);
+        return;
+      }
+
       try {
-        // Check if user is authenticated
-        const response = await api.auth.getProfile().catch(() => null);
-        setIsLoggedIn(!!response);
-        
-        if (response) {
-          // Only load favorites if user is authenticated
-          setLoading(true);
-          const favoritesResponse = await api.favorites.get();
-          setFavorites(favoritesResponse.map(product => product._id));
-        }
+        setLoading(true);
+        const favoritesResponse = await api.favorites.get().catch(() => []);
+        setFavorites(favoritesResponse.map(product => product._id));
       } catch (error) {
-        console.error('Failed to check auth or load favorites:', error);
+        console.error('Failed to load favorites:', error);
+        setFavorites([]);
       } finally {
         setLoading(false);
       }
     };
 
-    checkAuthAndLoadFavorites();
-  }, []);
+    loadFavorites();
+  }, [isAuthenticated]);
 
   const isFavorite = (productId: string) => {
     return favorites.includes(productId);
   };
 
   const toggleFavorite = async (productId: string) => {
-    console.log('toggleFavorite called, isLoggedIn:', isLoggedIn);
+    console.log('toggleFavorite called, isAuthenticated:', isAuthenticated);
     
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       console.log('User not logged in, showing auth modal');
       setShowAuthModal(true);
       return;
@@ -63,7 +64,7 @@ export const useFavorites = () => {
   return {
     favorites,
     loading,
-    isLoggedIn,
+    isLoggedIn: isAuthenticated,
     showAuthModal,
     setShowAuthModal,
     isFavorite,

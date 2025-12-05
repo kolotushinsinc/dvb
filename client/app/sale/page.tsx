@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, Heart, Eye, Filter, X, Search } from 'lucide-react';
+import { Star, Heart, Eye, Filter, X, Search, Grid3x3, List } from 'lucide-react';
 import { UniversalFilters } from '@/components/catalog/UniversalFilters';
 import { useFavorites } from '@/hooks/useFavorites';
 import { toast } from 'sonner';
@@ -31,6 +31,7 @@ const SalePage = () => {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('discount');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const { toggleFavorite, isFavorite, isLoggedIn, showAuthModal, setShowAuthModal } = useFavorites();
 
   // Load products on mount
@@ -390,16 +391,34 @@ const SalePage = () => {
                 </Select>
               </div>
 
-              {/* Apply Filters Button */}
-              <Button 
-                onClick={applyFilters} 
-                className="lg:hidden bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 shadow-lg hover:shadow-xl"
-              >
-                Применить фильтры
-              </Button>
+              {/* View Mode Toggle */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === 'grid'
+                      ? 'bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-md'
+                      : 'bg-secondary-50 text-charcoal-600 hover:bg-secondary-100'
+                  }`}
+                  title="Вид сеткой"
+                >
+                  <Grid3x3 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === 'list'
+                      ? 'bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-md'
+                      : 'bg-secondary-50 text-charcoal-600 hover:bg-secondary-100'
+                  }`}
+                  title="Вид списком"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-4'}>
               {loading ? (
                 Array.from({ length: 6 }).map((_, index) => (
                   <div key={index} className="bg-white rounded-2xl shadow-lg p-6 border border-secondary-100 h-[400px] flex items-center justify-center">

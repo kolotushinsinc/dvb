@@ -9,7 +9,9 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  UserCog,
+  Star
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -22,6 +24,8 @@ const navigation = [
   { name: 'Категории', href: '/categories', icon: Tags },
   { name: 'Заказы', href: '/orders', icon: ShoppingCart },
   { name: 'Клиенты', href: '/customers', icon: Users },
+  { name: 'Менеджеры', href: '/managers', icon: UserCog },
+  { name: 'Отзывы', href: '/reviews', icon: Star },
   { name: 'Настройки', href: '/settings', icon: Settings },
 ];
 

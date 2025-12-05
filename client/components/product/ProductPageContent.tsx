@@ -22,6 +22,9 @@ import { AuthModal } from '@/components/ui/AuthModal';
 import { ColorSelector } from './ColorSelector';
 import { ProductQuickView } from '@/components/product/ProductQuickView';
 import { LazyImage } from '@/components/ui/LazyImage';
+import { ReviewForm } from './ReviewForm';
+import { Review } from '@/types/product';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ProductPageContent() {
   const params = useParams();
@@ -36,8 +39,14 @@ export default function ProductPageContent() {
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [editingReview, setEditingReview] = useState<Review | undefined>(undefined);
   const { addItem, isInCart, items } = useCart();
   const { isFavorite, toggleFavorite, showAuthModal, setShowAuthModal } = useFavorites();
+  const { user } = useAuth();
+  const isAdmin = user?.isAdmin || false;
 
   // Load product on mount
   useEffect(() => {
@@ -46,25 +55,9 @@ export default function ProductPageContent() {
         setLoading(true);
         console.log('Loading product with slug:', slug);
         
-        // Test direct API call first
-        try {
-          const directResponse = await fetch(`https://api.dvberry.ru/api/products/${slug}`);
-          console.log('Direct API response status:', directResponse.status);
-          if (directResponse.ok) {
-            const directData = await directResponse.json();
-            console.log('Direct API response data:', directData);
-          } else {
-            console.error('Direct API call failed with status:', directResponse.status);
-          }
-        } catch (directError) {
-          console.error('Direct API call error:', directError);
-        }
-        
         // Сначала загружаем продукт
         const productResponse = await api.products.getBySlug(slug);
         console.log('Product response:', productResponse);
-        console.log('Product response type:', typeof productResponse);
-        console.log('Product response keys:', Object.keys(productResponse || {}));
         
         // Handle different response formats
         let productData = productResponse;
@@ -72,10 +65,10 @@ export default function ProductPageContent() {
         
         if (productResponseAny && productResponseAny.success === true && productResponseAny.data && productResponseAny.data.product) {
           productData = productResponseAny.data.product;
-          console.log('Using nested data.product format');
         }
         
         console.log('Final product data:', productData);
+        console.log('Product videoLinks:', productData.videoLinks);
         setProduct(productData);
         setError(null);
         
@@ -313,11 +306,11 @@ export default function ProductPageContent() {
 
               {/* Thumbnail Images */}
               {product.images && product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-4 gap-2 sm:gap-4">
                   {product.images.map((image, index) => (
                     <button
                       key={index}
-                      className={`relative overflow-hidden rounded-xl h-24 transition-all cursor-pointer shadow-md hover:shadow-lg ${
+                      className={`relative overflow-hidden rounded-xl h-16 sm:h-20 md:h-24 transition-all cursor-pointer shadow-md hover:shadow-lg ${
                         selectedImageIndex === index 
                           ? 'border-2 border-primary-500 ring-2 ring-primary-200 scale-105' 
                           : 'border border-secondary-100 hover:border-primary-200'
@@ -541,7 +534,7 @@ export default function ProductPageContent() {
                 </TabsTrigger>
               </TabsList>
             
-              <TabsContent value="description" className="mt-8">
+            <TabsContent value="description" className="mt-8">
               <Card className="border border-secondary-100 shadow-lg">
                 <CardContent className="p-8">
                   <div className="prose max-w-none text-charcoal-700">
@@ -577,6 +570,30 @@ export default function ProductPageContent() {
                             </li>
                           ))}
                         </ul>
+                      </>
+                    )}
+                    {product.videoLinks && product.videoLinks.length > 0 && (
+                      <>
+                        <h3 className="text-xl font-semibold mt-8 mb-4 text-charcoal-800 text-center">Видео</h3>
+                        <div className="flex flex-col items-center gap-6">
+                          {product.videoLinks.map((link: string, index: number) => {
+                            // Extract video ID from Rutube URL
+                            const videoId = link.match(/\/video\/([a-zA-Z0-9]+)/)?.[1];
+                            if (!videoId) return null;
+                            
+                            return (
+                              <div key={index} className="relative w-full max-w-3xl aspect-video rounded-lg overflow-hidden bg-secondary-100 shadow-lg">
+                                <iframe
+                                  src={`https://rutube.ru/play/embed/${videoId}`}
+                                  frameBorder="0"
+                                  allow="clipboard-write; autoplay"
+                                  allowFullScreen
+                                  className="absolute top-0 left-0 w-full h-full"
+                                ></iframe>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </>
                     )}
                   </div>
@@ -637,14 +654,73 @@ export default function ProductPageContent() {
             <TabsContent value="reviews" className="mt-8">
               <Card className="border border-secondary-100 shadow-lg">
                 <CardContent className="p-8">
+                  {/* Add Review Button */}
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 pb-6 border-b border-secondary-100">
+                    <h3 className="text-xl font-semibold text-charcoal-800">
+                      Отзывы покупателей
+                    </h3>
+                    {user && (
+                      <Button
+                        onClick={() => {
+                          setEditingReview(undefined);
+                          setShowReviewForm(true);
+                        }}
+                        className="bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900 w-full sm:w-auto"
+                      >
+                        Добавить отзыв
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Reviews List */}
                   {product.reviews && product.reviews.length > 0 ? (
                     <div className="space-y-6">
-                      {product.reviews.map((review, index) => (
-                        <div key={index} className="border-b border-secondary-100 pb-6 last:border-0 last:pb-0">
-                          <div className="flex justify-between mb-2">
-                            <h4 className="font-medium text-charcoal-800">Аноним</h4>
-                            <div className="flex items-center">
-                              <div className="flex">
+                      {product.reviews.map((review) => (
+                        <div key={review._id} className="border-b border-secondary-100 pb-6 last:border-0 last:pb-0">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 mb-3">
+                            <div className="flex items-start space-x-3 flex-1">
+                              {/* Avatar */}
+                              <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center flex-shrink-0">
+                                {review.fictionalAuthor?.avatar ? (
+                                  <div className="w-full h-full rounded-full bg-secondary-200" />
+                                ) : (
+                                  <span className="text-charcoal-600 font-medium text-sm">
+                                    {review.isFictional
+                                      ? review.fictionalAuthor?.name?.charAt(0).toUpperCase()
+                                      : review.userId
+                                      ? `${review.userId.firstName?.charAt(0)}${review.userId.lastName?.charAt(0)}`
+                                      : 'А'}
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Author Info */}
+                              <div>
+                                <h4 className="font-medium text-charcoal-800">
+                                  {review.isFictional
+                                    ? review.fictionalAuthor?.name
+                                    : review.userId
+                                    ? `${review.userId.firstName} ${review.userId.lastName}`
+                                    : 'Аноним'}
+                                </h4>
+                                {review.fictionalAuthor?.city && (
+                                  <p className="text-xs text-charcoal-500">
+                                    {review.fictionalAuthor.city}
+                                    {review.fictionalAuthor.age && `, ${review.fictionalAuthor.age} лет`}
+                                  </p>
+                                )}
+                                {review.isVerified && (
+                                  <span className="inline-flex items-center text-xs text-green-600 mt-1">
+                                    <Check className="w-3 h-3 mr-1" />
+                                    Проверенная покупка
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Rating and Date */}
+                            <div className="flex flex-col items-end">
+                              <div className="flex items-center space-x-1">
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
@@ -656,18 +732,73 @@ export default function ProductPageContent() {
                                   />
                                 ))}
                               </div>
-                              <span className="text-sm text-charcoal-500 ml-2">
+                              <span className="text-xs text-charcoal-500 mt-1">
                                 {new Date(review.createdAt).toLocaleDateString('ru-RU')}
                               </span>
                             </div>
                           </div>
-                          <p className="text-charcoal-600">{review.comment}</p>
+
+                          {/* Review Title */}
+                          {review.title && (
+                            <h5 className="font-semibold text-charcoal-800 mb-2">{review.title}</h5>
+                          )}
+
+                          {/* Review Comment */}
+                          <p className="text-charcoal-600 whitespace-pre-line leading-relaxed break-words">
+                            {review.comment}
+                          </p>
+
+                          {/* Admin Actions */}
+                          {isAdmin && (
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-4 pt-4 border-t border-secondary-50">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingReview(review);
+                                  setShowReviewForm(true);
+                                }}
+                                className="text-primary-600 hover:text-primary-700 hover:bg-primary-50 w-full sm:w-auto"
+                              >
+                                Редактировать
+                              </Button>
+                              <Badge
+                                variant={
+                                  review.status === 'PUBLISHED'
+                                    ? 'default'
+                                    : review.status === 'PENDING'
+                                    ? 'secondary'
+                                    : 'outline'
+                                }
+                                className="text-xs"
+                              >
+                                {review.status === 'PUBLISHED'
+                                  ? 'Опубликован'
+                                  : review.status === 'PENDING'
+                                  ? 'На модерации'
+                                  : 'Черновик'}
+                              </Badge>
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-10">
-                      <p className="text-charcoal-500">Отзывов пока нет. Будьте первым, кто оставит отзыв!</p>
+                      <p className="text-charcoal-500 mb-4">
+                        Отзывов пока нет. Будьте первым, кто оставит отзыв!
+                      </p>
+                      {user && (
+                        <Button
+                          onClick={() => {
+                            setEditingReview(undefined);
+                            setShowReviewForm(true);
+                          }}
+                          className="bg-gradient-to-r from-primary-400 to-primary-500 hover:from-primary-500 hover:to-primary-600 text-primary-900"
+                        >
+                          Написать отзыв
+                        </Button>
+                      )}
                     </div>
                   )}
                 </CardContent>
@@ -804,6 +935,34 @@ export default function ProductPageContent() {
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
+      />
+
+      {/* Review Form Modal */}
+      <ReviewForm
+        productId={product._id}
+        productName={product.name}
+        existingReview={editingReview}
+        isOpen={showReviewForm}
+        onClose={() => {
+          setShowReviewForm(false);
+          setEditingReview(undefined);
+        }}
+        onSuccess={async () => {
+          // Reload product to get updated reviews
+          try {
+            const productResponse = await api.products.getBySlug(slug);
+            let productData = productResponse;
+            const productResponseAny = productResponse as any;
+            
+            if (productResponseAny && productResponseAny.success === true && productResponseAny.data && productResponseAny.data.product) {
+              productData = productResponseAny.data.product;
+            }
+            
+            setProduct(productData);
+          } catch (err) {
+            console.error('Failed to reload product:', err);
+          }
+        }}
       />
     </div>
   );

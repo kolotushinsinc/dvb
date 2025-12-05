@@ -19,22 +19,47 @@ router.get('/', auth, async (req: Request, res: Response, next: NextFunction) =>
       })
       .lean();
 
-    const formattedCartItems = cartItems.map((item: any) => ({
-      id: item._id,
-      quantity: item.quantity,
-      size: item.size,
-      color: item.color,
-      product: {
-        ...item.productId,
-        mainImage: item.productId.images?.find((img: any) => img.isMain)?.url || null,
-        images: undefined
-      }
-    }));
+    const now = new Date();
+    const formattedCartItems = cartItems.map((item: any) => {
+      // Определяем актуальную цену
+      let currentPrice = item.productId.price;
+      let isPriceLocked = false;
+      let priceChanged = false;
 
-    // Calculate totals
+      // Проверяем, есть ли зарезервированная цена и не истекла ли она
+      if (item.reservedPrice && item.priceLockedUntil && new Date(item.priceLockedUntil) > now) {
+        currentPrice = item.reservedPrice;
+        isPriceLocked = true;
+      } else if (item.reservedPrice && item.reservedPrice !== item.productId.price) {
+        // Цена изменилась после истечения резервации
+        priceChanged = true;
+      }
+
+      return {
+        id: item._id,
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color,
+        reservedPrice: item.reservedPrice,
+        priceLockedUntil: item.priceLockedUntil,
+        isPriceLocked,
+        priceChanged,
+        product: {
+          ...item.productId,
+          mainImage: item.productId.images?.find((img: any) => img.isMain)?.url || null,
+          images: undefined,
+          currentPrice // Актуальная цена для отображения
+        }
+      };
+    });
+
+    // Calculate totals using actual prices
     const totalItems = cartItems.length;
     const totalQuantity = cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
-    const totalPrice = cartItems.reduce((sum: number, item: any) => sum + (item.productId.price * item.quantity), 0);
+    const totalPrice = formattedCartItems.reduce((sum: number, item: any) => {
+      const price = item.isPriceLocked ? item.reservedPrice : item.product.price;
+      return sum + (price * item.quantity);
+    }, 0);
 
     res.json({
       success: true,
@@ -275,6 +300,72 @@ router.delete('/', auth, async (req: Request, res: Response, next: NextFunction)
     res.json({
       success: true,
       message: 'Cart cleared'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Lock prices for checkout (reserve prices for 30 minutes)
+router.post('/lock-prices', auth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cartItems = await CartItem.find({ userId: (req.user as any).userId })
+      .populate('productId');
+
+    if (cartItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cart is empty'
+      });
+    }
+
+    // Lock prices for 30 minutes
+    const lockDuration = 30 * 60 * 1000; // 30 minutes in milliseconds
+    const priceLockedUntil = new Date(Date.now() + lockDuration);
+
+    // Update all cart items with reserved prices
+    const updatePromises = cartItems.map(async (item: any) => {
+      return CartItem.findByIdAndUpdate(
+        item._id,
+        {
+          reservedPrice: item.productId.price,
+          priceLockedUntil
+        },
+        { new: true }
+      );
+    });
+
+    await Promise.all(updatePromises);
+
+    res.json({
+      success: true,
+      message: 'Prices locked for 30 minutes',
+      data: {
+        priceLockedUntil,
+        lockDurationMinutes: 30
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Unlock prices (cancel reservation)
+router.post('/unlock-prices', auth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await CartItem.updateMany(
+      { userId: (req.user as any).userId },
+      {
+        $unset: {
+          reservedPrice: 1,
+          priceLockedUntil: 1
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      message: 'Price locks removed'
     });
   } catch (error) {
     next(error);

@@ -1,6 +1,6 @@
 import { Product } from '@/types/product';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
 
 async function fetchApi(endpoint: string, options?: RequestInit) {
   // Add retry logic for failed requests
@@ -11,12 +11,30 @@ async function fetchApi(endpoint: string, options?: RequestInit) {
   
   while (retryCount <= maxRetries) {
     try {
+      // Get token from localStorage
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+      
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // Add Authorization header if token exists
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      // Merge with any additional headers from options
+      if (options?.headers) {
+        Object.entries(options.headers).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            headers[key] = value;
+          }
+        });
+      }
+      
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...options?.headers,
-        },
+        headers,
         credentials: 'include',
       });
 
@@ -177,7 +195,17 @@ export const api = {
   },
   
   cart: {
-    get: async (): Promise<{ items: CartItem[]; summary: { totalItems: number; totalQuantity: number; totalPrice: number } }> => fetchApi('/cart'),
+    get: async (): Promise<{ items: CartItem[]; summary: { totalItems: number; totalQuantity: number; totalPrice: number } }> => {
+      const response = await fetchApi('/cart');
+      // Handle response format: { success: true, data: { items: [...], summary: {...} } }
+      if (response.success && response.data) {
+        return {
+          items: response.data.items || [],
+          summary: response.data.summary || { totalItems: 0, totalQuantity: 0, totalPrice: 0 }
+        };
+      }
+      return { items: [], summary: { totalItems: 0, totalQuantity: 0, totalPrice: 0 } };
+    },
     add: async (productId: string, quantity: number = 1, size?: string, color?: string) =>
       fetchApi('/cart/add', {
         method: 'POST',
@@ -197,9 +225,16 @@ export const api = {
   },
 
   favorites: {
-    get: async (): Promise<Product[]> => fetchApi('/favorites'),
+    get: async (): Promise<Product[]> => {
+      const response = await fetchApi('/favorites');
+      // Handle response format: { success: true, data: { favorites: [...] } }
+      if (response.success && response.data?.favorites) {
+        return response.data.favorites.map((fav: any) => fav.product);
+      }
+      return [];
+    },
     add: async (productId: string) =>
-      fetchApi('/favorites', {
+      fetchApi('/favorites/add', {
         method: 'POST',
         body: JSON.stringify({ productId })
       }),
@@ -207,7 +242,13 @@ export const api = {
       fetchApi(`/favorites/${productId}`, {
         method: 'DELETE'
       }),
-    check: async (productId: string): Promise<{ isFavorite: boolean }> => fetchApi(`/favorites/check/${productId}`),
+    check: async (productId: string): Promise<{ isFavorite: boolean }> => {
+      const response = await fetchApi(`/favorites/check/${productId}`);
+      if (response.success && response.data) {
+        return { isFavorite: response.data.isFavorite };
+      }
+      return { isFavorite: false };
+    },
   },
 
   auth: {
@@ -270,13 +311,80 @@ export const api = {
   },
 
   orders: {
-    create: async (items: { productId: string; quantity: number; size?: string; color?: string }[], shippingAddress: any) =>
+    create: async (items: { productId: string; quantity: number; price: number; size?: string; color?: string }[], shippingAddress: any, customerEmail: string, customerPhone?: string) =>
       fetchApi('/orders', {
         method: 'POST',
-        body: JSON.stringify({ items, shippingAddress })
+        body: JSON.stringify({ items, shippingAddress, customerEmail, customerPhone })
       }),
-    getUserOrders: async (): Promise<Order[]> => fetchApi('/orders'),
-    getOrderById: async (id: string): Promise<Order> => fetchApi(`/orders/${id}`),
+    getUserOrders: async (): Promise<Order[]> => {
+      const response = await fetchApi('/orders');
+      // Handle response format: { success: true, data: { orders: [...] } }
+      if (response.success && response.data?.orders) {
+        return response.data.orders;
+      }
+      return [];
+    },
+    getOrderById: async (id: string): Promise<Order> => {
+      const response = await fetchApi(`/orders/${id}`);
+      // Handle response format: { success: true, data: { order: {...} } }
+      if (response.success && response.data?.order) {
+        return response.data.order;
+      }
+      return response;
+    },
+  },
+
+  reviews: {
+    getByProduct: async (productId: string, params?: { page?: number; limit?: number; rating?: number }) => {
+      const queryParams = new URLSearchParams();
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined) {
+            queryParams.append(key, value.toString());
+          }
+        });
+      }
+      const query = queryParams.toString();
+      return fetchApi(`/reviews/product/${productId}${query ? `?${query}` : ''}`);
+    },
+    create: async (data: {
+      productId?: string;
+      rating: number;
+      title?: string;
+      comment: string;
+      isFictional?: boolean;
+      fictionalAuthor?: {
+        name: string;
+        age?: number;
+        city?: string;
+        avatar?: string;
+      };
+    }) =>
+      fetchApi('/reviews', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      }),
+    update: async (id: string, data: { rating?: number; title?: string; comment?: string }) =>
+      fetchApi(`/reviews/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data)
+      }),
+    delete: async (id: string) =>
+      fetchApi(`/reviews/${id}`, {
+        method: 'DELETE'
+      }),
+    getMyReviews: async (params?: { page?: number; limit?: number }) => {
+      const queryParams = new URLSearchParams();
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined) {
+            queryParams.append(key, value.toString());
+          }
+        });
+      }
+      const query = queryParams.toString();
+      return fetchApi(`/reviews/my-reviews${query ? `?${query}` : ''}`);
+    },
   }
 };
 

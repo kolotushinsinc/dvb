@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, Heart, Eye, ShoppingCart, Search } from 'lucide-react';
+import { Star, Heart, Eye, ShoppingCart, Search, Grid3x3, List } from 'lucide-react';
 import { useCart } from '@/components/cart/CartProvider';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCategories } from '@/contexts/CategoriesContext';
@@ -32,6 +32,9 @@ function CategoryPageContent() {
     selectedFilters: {} as Record<string, string[]>,
     selectedCountries: [] as string[]
   });
+  
+  const [sortBy, setSortBy] = useState<'default' | 'price-asc' | 'price-desc' | 'rating' | 'popularity'>('default');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [error, setError] = useState<string | null>(null);
   const { addItem } = useCart();
   const { toggleFavorite, isFavorite, isLoggedIn, showAuthModal, setShowAuthModal } = useFavorites();
@@ -61,7 +64,25 @@ function CategoryPageContent() {
     );
   }, [filteredProducts, searchQuery]);
   
-  // Сортировка удалена по просьбе пользователя
+  // Применяем сортировку
+  const sortedProducts = useMemo(() => {
+    if (!searchFilteredProducts || !Array.isArray(searchFilteredProducts)) return [];
+    
+    const sorted = [...searchFilteredProducts];
+    
+    switch (sortBy) {
+      case 'price-asc':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price-desc':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'rating':
+        return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      case 'popularity':
+        return sorted.sort((a, b) => (b.reviewsCount || 0) - (a.reviewsCount || 0));
+      default:
+        return sorted;
+    }
+  }, [searchFilteredProducts, sortBy]);
   
   // Проверяем существование категории
   const currentCategory = categories.find(c => c.slug === categorySlug);
@@ -165,11 +186,53 @@ function CategoryPageContent() {
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Sort Controls - ВРЕМЕННО УДАЛЕН */}
-            {/* Блок сортировки вызывал проблемы с отображением товаров */}
+            {/* Sort Controls */}
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center space-x-4">
+                <span className="text-charcoal-600">Сортировать:</span>
+                <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
+                  <SelectTrigger className="w-48 border-secondary-200 bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">По умолчанию</SelectItem>
+                    <SelectItem value="price-asc">Цена: по возрастанию</SelectItem>
+                    <SelectItem value="price-desc">Цена: по убыванию</SelectItem>
+                    <SelectItem value="rating">По рейтингу</SelectItem>
+                    <SelectItem value="popularity">По популярности</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              {/* View Mode Toggle */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === 'grid'
+                      ? 'bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-md'
+                      : 'bg-secondary-50 text-charcoal-600 hover:bg-secondary-100'
+                  }`}
+                  title="Вид сеткой"
+                >
+                  <Grid3x3 className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-2 rounded-lg transition-all duration-200 ${
+                    viewMode === 'list'
+                      ? 'bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-md'
+                      : 'bg-secondary-50 text-charcoal-600 hover:bg-secondary-100'
+                  }`}
+                  title="Вид списком"
+                >
+                  <List className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {searchFilteredProducts.map((product) => (
+            <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8' : 'space-y-4'}>
+              {sortedProducts.map((product) => (
                 <SlideIn key={product._id}>
                   <div className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-secondary-100 premium-shadow">
                       {/* Product Image */}
@@ -276,7 +339,7 @@ function CategoryPageContent() {
               ))}
             </div>
 
-            {searchFilteredProducts.length === 0 && (
+            {sortedProducts.length === 0 && (
               <div className="text-center py-16 bg-white rounded-2xl shadow-lg border border-secondary-100 premium-card">
                 <div className="max-w-md mx-auto">
                   <div className="w-20 h-20 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-6">

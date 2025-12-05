@@ -42,6 +42,7 @@ export interface Product {
   isActive?: boolean;
   sortOrder?: number;
   attributes?: ProductAttributes;
+  videoLinks?: string[]; // Ссылки на видео Rutube
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -128,15 +129,44 @@ export interface Category {
   productsCount?: number;
 }
 
+export interface FictionalAuthor {
+  name: string;
+  age?: number;
+  city?: string;
+  avatar?: string;
+}
+
 export interface Review {
   _id: string;
-  rating: number;
-  comment?: string;
-  createdAt: Date;
   userId?: {
+    _id: string;
     firstName: string;
     lastName: string;
-  };
+    email: string;
+  } | string;
+  productId?: {
+    _id: string;
+    name: string;
+    slug: string;
+    images: ProductImage[];
+  } | string;
+  rating: number;
+  title?: string;
+  comment: string;
+  isVerified: boolean;
+  isApproved: boolean;
+  status: 'DRAFT' | 'PENDING' | 'PUBLISHED';
+  isFictional: boolean;
+  fictionalAuthor?: FictionalAuthor;
+  addedByAdmin: boolean;
+  addedBy?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  } | string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Order {

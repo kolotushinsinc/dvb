@@ -6,6 +6,8 @@ export interface ICartItem extends Document {
   quantity: number;
   size?: string;
   color?: string;
+  reservedPrice?: number; // Зарезервированная цена
+  priceLockedUntil?: Date; // Время до которого цена зарезервирована
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +36,13 @@ const cartItemSchema = new Schema<ICartItem>({
   color: {
     type: String,
     trim: true
+  },
+  reservedPrice: {
+    type: Number,
+    min: 0
+  },
+  priceLockedUntil: {
+    type: Date
   }
 }, {
   timestamps: true

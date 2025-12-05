@@ -114,17 +114,17 @@ npm run init:categories
 
 1. Проверьте получение категорий с фильтрами:
    ```bash
-   curl https://api.dvberry.ru/api/categories
+   curl http://localhost:5001/api/categories
    ```
 
 2. Проверьте получение товаров с фильтрацией:
    ```bash
-   curl "https://api.dvberry.ru/api/products?category=glasses&gender=MALE&price_min=1000&price_max=5000"
+   curl "http://localhost:5001/api/products?category=glasses&gender=MALE&price_min=1000&price_max=5000"
    ```
 
 3. Проверьте получение товаров по категории:
    ```bash
-   curl https://api.dvberry.ru/api/products/category/glasses
+   curl http://localhost:5001/api/products/category/glasses
    ```
 
 ## Возможные проблемы и их решения

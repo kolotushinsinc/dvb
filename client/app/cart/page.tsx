@@ -77,20 +77,15 @@ const CartPage = () => {
     }
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (items.length === 0) {
       toast.error('Корзина пуста');
       return;
     }
 
     setIsCheckingOut(true);
-    try {
-      // Redirect to checkout page
-      window.location.href = '/checkout';
-    } catch (error) {
-      toast.error('Не удалось перейти к оформлению заказа');
-      setIsCheckingOut(false);
-    }
+    // Use Next.js router for navigation
+    window.location.href = '/checkout';
   };
 
   const formatPrice = (price: number) => {

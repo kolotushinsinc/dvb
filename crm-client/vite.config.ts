@@ -14,11 +14,11 @@ export default defineConfig({
     port: 3001,
     proxy: {
       '/api': {
-        target: 'https://api.dvberry.ru',
+        target: 'http://localhost:5001',
         changeOrigin: true,
       },
       '/uploads': {
-        target: 'https://api.dvberry.ru',
+        target: 'http://localhost:5001',
         changeOrigin: true,
       },
     },

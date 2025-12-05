@@ -16,7 +16,7 @@ const nextConfig = {
     return [
       {
         source: '/uploads/:path*',
-        destination: 'https://api.dvberry.ru/uploads/:path*',
+        destination: 'http://localhost:5001/uploads/:path*',
       },
     ];
   },

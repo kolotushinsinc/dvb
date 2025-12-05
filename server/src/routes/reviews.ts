@@ -81,10 +81,16 @@ router.get('/product/:productId', [
 
 // Create a review
 router.post('/', [
-  body('productId').isString().notEmpty(),
+  body('productId').optional().isString(),
   body('rating').isInt({ min: 1, max: 5 }),
   body('title').optional().trim().isLength({ max: 100 }),
-  body('comment').optional().trim().isLength({ max: 1000 }),
+  body('comment').trim().notEmpty().isLength({ max: 2000 }),
+  body('isFictional').optional().isBoolean(),
+  body('fictionalAuthor').optional().isObject(),
+  body('fictionalAuthor.name').optional().trim(),
+  body('fictionalAuthor.age').optional().isInt({ min: 1, max: 120 }),
+  body('fictionalAuthor.city').optional().trim(),
+  body('fictionalAuthor.avatar').optional().trim(),
 ], auth, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const errors = validationResult(req);
@@ -96,60 +102,114 @@ router.post('/', [
       });
     }
 
-    const { productId, rating, title, comment } = req.body;
+    const { productId, rating, title, comment, isFictional, fictionalAuthor } = req.body;
+    const user = await User.findById((req.user as any).userId);
 
-    // Check if product exists
-    const product = await Product.findOne({
-      _id: productId,
-      isActive: true
-    });
-
-    if (!product) {
-      return res.status(404).json({
+    if (!user) {
+      return res.status(401).json({
         success: false,
-        error: 'Product not found'
+        error: 'User not found'
       });
     }
 
-    // Check if user already reviewed this product
-    const existingReview = await Review.findOne({
-      userId: (req.user as any).userId,
-      productId
-    });
-
-    if (existingReview) {
-      return res.status(400).json({
-        success: false,
-        error: 'You have already reviewed this product'
+    // Check if product exists (if provided)
+    if (productId) {
+      const product = await Product.findOne({
+        _id: productId,
+        isActive: true
       });
+
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          error: 'Product not found'
+        });
+      }
+    }
+
+    // Only admins can create fictional reviews
+    const isAdmin = user.isAdmin || false;
+    const shouldBeFictional = isFictional && isAdmin;
+
+    if (isFictional && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        error: 'Only administrators can create fictional reviews'
+      });
+    }
+
+    // For real user reviews, check if they already reviewed this product
+    if (!shouldBeFictional && productId) {
+      const existingReview = await Review.findOne({
+        userId: (req.user as any).userId,
+        productId,
+        isFictional: false
+      });
+
+      if (existingReview) {
+        return res.status(400).json({
+          success: false,
+          error: 'You have already reviewed this product'
+        });
+      }
     }
 
     // Check if user has ordered this product (verified purchase)
-    const userOrder = await Order.findOne({
-      userId: (req.user as any).userId,
-      status: 'DELIVERED',
-      'items.productId': productId
-    });
+    let isVerified = false;
+    if (!shouldBeFictional && productId) {
+      const userOrder = await Order.findOne({
+        userId: (req.user as any).userId,
+        status: 'DELIVERED',
+        'items.productId': productId
+      });
+      isVerified = !!userOrder;
+    }
 
-    const review = await Review.create({
-      userId: (req.user as any).userId,
-      productId,
+    const reviewData: any = {
       rating,
-      title: title || null,
-      comment: comment || null,
-      isVerified: !!userOrder,
-      isApproved: true // Auto-approve for now
-    });
+      title: title || undefined,
+      comment,
+      isVerified,
+      status: 'PENDING',
+      isApproved: false,
+      isFictional: shouldBeFictional,
+      addedByAdmin: isAdmin
+    };
+
+    if (shouldBeFictional) {
+      if (!fictionalAuthor || !fictionalAuthor.name) {
+        return res.status(400).json({
+          success: false,
+          error: 'Fictional author name is required'
+        });
+      }
+      reviewData.fictionalAuthor = {
+        name: fictionalAuthor.name,
+        age: fictionalAuthor.age || undefined,
+        city: fictionalAuthor.city || undefined,
+        avatar: fictionalAuthor.avatar || undefined
+      };
+      reviewData.addedBy = (req.user as any).userId;
+    } else {
+      reviewData.userId = (req.user as any).userId;
+    }
+
+    if (productId) {
+      reviewData.productId = productId;
+    }
+
+    const review = await Review.create(reviewData);
 
     // Populate user data
-    await review.populate({
-      path: 'userId',
-      select: 'firstName lastName'
-    });
+    await review.populate([
+      { path: 'userId', select: 'firstName lastName email' },
+      { path: 'productId', select: 'name slug images' },
+      { path: 'addedBy', select: 'firstName lastName email' }
+    ]);
 
     res.status(201).json({
       success: true,
-      message: 'Review created successfully',
+      message: 'Review created successfully and is pending moderation',
       data: { review }
     });
   } catch (error) {

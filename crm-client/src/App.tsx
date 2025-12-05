@@ -7,6 +7,8 @@ import { Orders } from '@/pages/Orders'
 import { Customers } from '@/pages/Customers'
 import { Settings } from '@/pages/Settings'
 import { Login } from '@/pages/Login'
+import { Managers } from '@/pages/Managers'
+import Reviews from '@/pages/Reviews'
 import { Layout } from '@/components/Layout'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -29,6 +31,8 @@ function App() {
                     <Route path="/categories" element={<Categories />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/customers" element={<Customers />} />
+                    <Route path="/managers" element={<Managers />} />
+                    <Route path="/reviews" element={<Reviews />} />
                     <Route path="/settings" element={<Settings />} />
                   </Routes>
                 </Layout>

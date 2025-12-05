@@ -2,7 +2,7 @@ import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'ax
 import { User, Product, Category, Order, DashboardStats } from '@/types';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://api.dvberry.ru/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
   timeout: 10000,
 });
 
@@ -114,16 +114,20 @@ export const productsApi = {
       ...(data.images && {
         images: data.images.map((img, index) => ({
           url: typeof img === 'string' ? img : img.url,
+          thumbnailUrl: typeof img === 'object' && 'thumbnailUrl' in img ? img.thumbnailUrl : undefined,
           alt: data.name || '',
-          isMain: index === 0,
-          sortOrder: index
+          isMain: typeof img === 'object' && 'isMain' in img ? img.isMain : index === 0,
+          sortOrder: typeof img === 'object' && 'sortOrder' in img ? img.sortOrder : index
         }))
       })
     };
     
-    // Remove undefined fields
+    // Remove the 'category' field as we're using 'categoryId'
+    delete transformedData.category;
+    
+    // Remove undefined and empty string fields for unique indexed fields
     Object.keys(transformedData).forEach(key => {
-      if (transformedData[key] === undefined) {
+      if (transformedData[key] === undefined || (key === 'sku' && transformedData[key] === '')) {
         delete transformedData[key];
       }
     });
@@ -273,6 +277,52 @@ export const dashboardApi = {
     // This endpoint needs to be created on the server
     const response = await api.get('/admin/dashboard/stats');
     return response.data.data?.stats || response.data;
+  },
+};
+
+export const reviewsApi = {
+  getAll: async (params?: {
+    page?: number;
+    limit?: number;
+    status?: 'DRAFT' | 'PENDING' | 'PUBLISHED';
+    isFictional?: boolean;
+  }): Promise<{ reviews: any[]; total: number; pagination?: any }> => {
+    const response = await api.get('/admin/reviews', { params });
+    const data = response.data.data || response.data;
+    return {
+      reviews: data.reviews || [],
+      total: data.total || data.pagination?.total || 0,
+      pagination: data.pagination
+    };
+  },
+  
+  getById: async (id: string): Promise<any> => {
+    const response = await api.get(`/admin/reviews/${id}`);
+    return response.data.data?.review || response.data;
+  },
+  
+  create: async (data: any): Promise<any> => {
+    const response = await api.post('/admin/reviews', data);
+    return response.data.data?.review || response.data;
+  },
+  
+  update: async (id: string, data: any): Promise<any> => {
+    const response = await api.put(`/admin/reviews/${id}`, data);
+    return response.data.data?.review || response.data;
+  },
+  
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/admin/reviews/${id}`);
+  },
+  
+  getUsers: async (search?: string): Promise<{ users: any[] }> => {
+    const response = await api.get('/admin/reviews/users', { params: { search } });
+    return response.data.data || response.data;
+  },
+  
+  getProducts: async (search?: string): Promise<{ products: any[] }> => {
+    const response = await api.get('/admin/reviews/products', { params: { search } });
+    return response.data.data || response.data;
   },
 };
 

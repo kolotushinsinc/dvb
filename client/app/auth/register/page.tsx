@@ -11,11 +11,12 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
-import { api } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const RegisterPage = () => {
   const router = useRouter();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -82,14 +83,14 @@ const RegisterPage = () => {
     
     try {
       setLoading(true);
-      await api.auth.register(
+      await register(
         formData.firstName,
         formData.lastName,
         formData.email,
         formData.password
       );
-      toast.success('Регистрация прошла успешно! Теперь вы можете войти в систему.');
-      router.push('/auth/login');
+      toast.success('Регистрация прошла успешно! Вы автоматически вошли в систему.');
+      router.push('/profile');
     } catch (err: any) {
       toast.error(err.message || 'Не удалось зарегистрироваться');
       console.error('Registration error:', err);

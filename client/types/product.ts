@@ -35,6 +35,7 @@ export interface Product {
   features?: string[];
   categoryType?: 'GLASSES' | 'SHOES' | 'CLOTHING' | 'ACCESSORIES';
   attributes?: GlassesAttributes | ShoesAttributes | ClothingAttributes | AccessoriesAttributes;
+  videoLinks?: string[]; // Ссылки на видео Rutube
 }
 
 // Интерфейсы для специфических атрибутов категорий
@@ -165,11 +166,39 @@ export interface Category {
   productsCount?: number;
 }
 
+export interface FictionalAuthor {
+  name: string;
+  age?: number;
+  city?: string;
+  avatar?: string;
+}
+
 export interface Review {
   _id: string;
+  userId?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  productId?: string;
   rating: number;
-  comment?: string;
+  title?: string;
+  comment: string;
+  isVerified: boolean;
+  isApproved: boolean;
+  status: 'DRAFT' | 'PENDING' | 'PUBLISHED';
+  isFictional: boolean;
+  fictionalAuthor?: FictionalAuthor;
+  addedByAdmin: boolean;
+  addedBy?: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CartItem {

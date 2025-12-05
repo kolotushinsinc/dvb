@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -15,6 +16,7 @@ import { api, Order } from '@/lib/api';
 import { Product } from '@/types/product';
 import { toast } from 'sonner';
 import { useCart } from '@/components/cart/CartProvider';
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 
 interface UserProfile {
@@ -23,7 +25,7 @@ interface UserProfile {
   lastName: string;
   email: string;
   phone?: string;
-  addresses: Array<{
+  addresses?: Array<{
     _id: string;
     street: string;
     city: string;
@@ -41,6 +43,8 @@ interface Favorite {
 }
 
 const ProfilePage = () => {
+  const router = useRouter();
+  const { user: authUser, logout, isAuthenticated, loading: authLoading } = useAuth();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
@@ -57,32 +61,53 @@ const ProfilePage = () => {
   // Load user data on mount
   useEffect(() => {
     const loadUserData = async () => {
+      if (!isAuthenticated) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         
         // Get user profile
         const userResponse = await api.auth.getProfile();
-        setUser(userResponse.data);
-        setEditForm({
-          firstName: userResponse.data.firstName,
-          lastName: userResponse.data.lastName,
-          email: userResponse.data.email,
-          phone: userResponse.data.phone || ''
-        });
+        if (userResponse.success && userResponse.data?.user) {
+          setUser(userResponse.data.user);
+          setEditForm({
+            firstName: userResponse.data.user.firstName || '',
+            lastName: userResponse.data.user.lastName || '',
+            email: userResponse.data.user.email || '',
+            phone: userResponse.data.user.phone || ''
+          });
+        }
         
         // Get user orders
-        const ordersResponse = await api.orders.getUserOrders();
-        setOrders(ordersResponse);
+        try {
+          const ordersResponse = await api.orders.getUserOrders();
+          setOrders(ordersResponse);
+        } catch (err) {
+          console.error('Failed to load orders:', err);
+          setOrders([]);
+        }
         
         // Get user favorites
-        const favoritesResponse = await api.favorites.get();
-        // Преобразуем массив продуктов в массив избранного
-        const favoritesData = favoritesResponse.map((product, index) => ({
-          _id: `fav-${index}`,
-          product,
-          createdAt: new Date().toISOString()
-        }));
-        setFavorites(favoritesData);
+        try {
+          const favoritesResponse = await api.favorites.get();
+          // Преобразуем массив продуктов в массив избранного
+          if (Array.isArray(favoritesResponse)) {
+            const favoritesData = favoritesResponse.map((product, index) => ({
+              _id: `fav-${index}`,
+              product,
+              createdAt: new Date().toISOString()
+            }));
+            setFavorites(favoritesData);
+          } else {
+            setFavorites([]);
+          }
+        } catch (err) {
+          console.error('Failed to load favorites:', err);
+          setFavorites([]);
+        }
       } catch (err) {
         toast.error('Не удалось загрузить данные профиля');
         console.error('Profile load error:', err);
@@ -91,8 +116,10 @@ const ProfilePage = () => {
       }
     };
 
-    loadUserData();
-  }, []);
+    if (!authLoading) {
+      loadUserData();
+    }
+  }, [isAuthenticated, authLoading]);
 
   const handleSaveProfile = async () => {
     if (!user) return;
@@ -110,10 +137,10 @@ const ProfilePage = () => {
 
   const handleLogout = async () => {
     try {
-      await api.auth.logout();
+      await logout();
       clearCart();
       toast.success('Вы успешно вышли из системы');
-      window.location.href = '/';
+      router.push('/');
     } catch (err) {
       toast.error('Не удалось выйти из системы');
       console.error('Logout error:', err);
@@ -166,7 +193,7 @@ const ProfilePage = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
         <div className="text-center">
@@ -177,7 +204,7 @@ const ProfilePage = () => {
     );
   }
 
-  if (!user) {
+  if (!isAuthenticated || !user) {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
         <div className="text-center">
@@ -251,7 +278,7 @@ const ProfilePage = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {user.addresses.length > 0 ? (
+                {user.addresses && user.addresses.length > 0 ? (
                   <div className="space-y-4">
                     {user.addresses.map((address) => (
                       <div key={address._id} className="border rounded-lg p-3">

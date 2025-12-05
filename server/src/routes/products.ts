@@ -210,7 +210,7 @@ router.get('/', [
 
     // Calculate average rating for each product
     const productsWithRating = products.map((product: any) => {
-      const productReviews = reviews.filter((r: IReview) => r.productId.toString() === product._id.toString());
+      const productReviews = reviews.filter((r: IReview) => r.productId && r.productId.toString() === product._id.toString());
       const avgRating = productReviews.length > 0
         ? productReviews.reduce((sum: number, review: IReview) => sum + review.rating, 0) / productReviews.length
         : 0;
@@ -283,13 +283,17 @@ router.get('/:identifier', optionalAuth, async (req: Request, res: Response, nex
       });
     }
 
-    // Fetch reviews separately
+    // Fetch reviews separately - show all reviews with status PUBLISHED
     const reviews = await Review.find({
       productId: product._id,
-      isApproved: true
+      status: 'PUBLISHED'
     })
     .populate({
       path: 'userId',
+      select: 'firstName lastName'
+    })
+    .populate({
+      path: 'addedBy',
       select: 'firstName lastName'
     })
     .sort({ createdAt: -1 })
@@ -410,6 +414,7 @@ router.post('/', [
   body('stock').optional().isInt({ min: 0 }),
   body('features').optional().isArray(),
   body('attributes').optional().isObject(),
+  body('videoLinks').optional().isArray(),
 ], async (req: Request, res: Response, next: NextFunction) => {
   try {
     const errors = validationResult(req);
@@ -445,7 +450,8 @@ router.post('/', [
       seoTitle,
       seoDescription,
       isFeatured = false,
-      sortOrder = 0
+      sortOrder = 0,
+      videoLinks = []
     } = req.body;
 
     // Check if category exists
@@ -499,7 +505,8 @@ router.post('/', [
       seoTitle,
       seoDescription,
       isFeatured,
-      sortOrder
+      sortOrder,
+      videoLinks
     };
 
     // Set category type based on category
@@ -547,6 +554,7 @@ router.put('/:id', [
   body('stock').optional().isInt({ min: 0 }),
   body('features').optional().isArray(),
   body('attributes').optional().isObject(),
+  body('videoLinks').optional().isArray(),
 ], async (req: Request, res: Response, next: NextFunction) => {
   try {
     const errors = validationResult(req);
@@ -586,19 +594,31 @@ router.put('/:id', [
 
     // Update slug if name is changed and slug is not provided
     if (updateData.name && !updateData.slug) {
-      updateData.slug = updateData.name
+      const newSlug = updateData.name
         .toLowerCase()
         .replace(/[^\w\s-]/g, '')
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim();
+      
+      // Check if slug is different from current product slug
+      if (newSlug !== product.slug) {
+        // Check if new slug already exists
+        const existingProduct = await Product.findOne({ slug: newSlug, _id: { $ne: id } });
+        if (existingProduct) {
+          // Add a unique suffix
+          updateData.slug = `${newSlug}-${Date.now()}`;
+        } else {
+          updateData.slug = newSlug;
+        }
+      }
     }
 
     // Update product
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       updateData,
-      { new: true, runValidators: true }
+      { new: true, runValidators: false }
     ).populate({
       path: 'categoryId',
       select: 'name slug'
