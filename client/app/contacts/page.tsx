@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Phone, Mail, Clock, Send } from 'lucide-react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
 
 const ContactsPage = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +20,30 @@ const ContactsPage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [settings, setSettings] = useState({
+    address: 'г. Находка, ул. Ленинская 10, офис 10',
+    phone: '+7 (914) 731-99-09',
+    email: 'siriusdark999@yandex.ru',
+    telegram: ''
+  });
+
+  useEffect(() => {
+    // Fetch settings from API
+    const fetchSettings = async () => {
+      try {
+        const data = await api.settings.get();
+        setSettings({
+          address: data.address || 'г. Находка, ул. Ленинская 10, офис 10',
+          phone: data.phone || '+7 (914) 731-99-09',
+          email: data.email || 'siriusdark999@yandex.ru',
+          telegram: data.telegram || ''
+        });
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -73,7 +98,7 @@ const ContactsPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Адрес</h3>
                     <p className="text-gray-700">
-                      г. Находка, ул. Ленинская 10, офис 10<br />
+                      {settings.address}<br />
                       Россия
                     </p>
                   </div>
@@ -88,8 +113,8 @@ const ContactsPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Телефон</h3>
                     <p className="text-gray-700">
-                      <Link href="tel:+79147319909" className="hover:text-primary">
-                        +7 (914) 731-99-09
+                      <Link href={`tel:${settings.phone.replace(/\s/g, '')}`} className="hover:text-primary transition-colors">
+                        {settings.phone}
                       </Link>
                       <br />
                       <span className="text-sm">Круглосуточно</span>
@@ -106,13 +131,39 @@ const ContactsPage = () => {
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
                     <p className="text-gray-700">
-                      <Link href="mailto:siriusdark999@yandex.ru" className="hover:text-primary">
-                        siriusdark999@yandex.ru
+                      <Link href={`mailto:${settings.email}`} className="hover:text-primary transition-colors">
+                        {settings.email}
                       </Link>
                     </p>
                   </div>
                 </CardContent>
               </Card>
+
+              {settings.telegram && (
+                <Card>
+                  <CardContent className="flex items-start space-x-4 pt-6">
+                    <div className="w-12 h-12 bg-[#0088cc]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <svg className="w-6 h-6 text-[#0088cc]" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 mb-1">Telegram</h3>
+                      <Link 
+                        href={settings.telegram} 
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 text-gray-700 hover:text-[#0088cc] transition-colors group"
+                      >
+                        <svg className="w-5 h-5 text-[#0088cc] group-hover:scale-110 transition-transform" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+                        </svg>
+                        <span className="font-medium">{settings.telegram.replace('https://t.me/', '@')}</span>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               <Card>
                 <CardContent className="flex items-start space-x-4 pt-6">

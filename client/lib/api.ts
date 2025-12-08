@@ -222,6 +222,15 @@ export const api = {
         body: JSON.stringify({ size, color })
       }),
     clear: async () => fetchApi('/cart', { method: 'DELETE' }),
+    validate: async (): Promise<CartValidationResult> => {
+      const response = await fetchApi('/cart/validate', {
+        method: 'POST'
+      });
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return { isValid: true, issues: [], validItems: [], totalIssues: 0, totalValidItems: 0 };
+    },
   },
 
   favorites: {
@@ -385,6 +394,17 @@ export const api = {
       const query = queryParams.toString();
       return fetchApi(`/reviews/my-reviews${query ? `?${query}` : ''}`);
     },
+  },
+
+  settings: {
+    get: async (): Promise<{ address: string; phone: string; email: string; telegram?: string }> => {
+      const response = await fetchApi('/settings');
+      // Handle response format: { success: true, data: {...} }
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return response;
+    },
   }
 };
 
@@ -452,4 +472,27 @@ export type CartItem = {
   quantity: number;
   size?: string;
   color?: string;
+  reservedPrice?: number;
+  priceLockedUntil?: string;
+  isPriceLocked?: boolean;
+  priceChanged?: boolean;
+};
+
+export type CartValidationIssue = {
+  itemId: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  type: 'OUT_OF_STOCK' | 'PRICE_CHANGED';
+  message: string;
+  oldPrice?: number;
+  newPrice?: number;
+};
+
+export type CartValidationResult = {
+  isValid: boolean;
+  issues: CartValidationIssue[];
+  validItems: any[];
+  totalIssues: number;
+  totalValidItems: number;
 };

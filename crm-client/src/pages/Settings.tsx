@@ -1,22 +1,25 @@
 import { useState, useEffect } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   User,
-  Bell,
-  Shield,
   Save,
-  Store,
-  Palette,
-  Globe
+  Store
 } from 'lucide-react';
-import { authApi } from '@/lib/api';
+import { authApi, settingsApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 export const Settings = () => {
+  const queryClient = useQueryClient();
+  
   const { data: user, isLoading } = useQuery({
     queryKey: ['profile'],
     queryFn: authApi.getProfile,
+  });
+
+  const { data: settings, isLoading: isLoadingSettings } = useQuery({
+    queryKey: ['settings'],
+    queryFn: settingsApi.get,
   });
 
   const [formData, setFormData] = useState({
@@ -25,11 +28,18 @@ export const Settings = () => {
     email: '',
   });
 
+  const [contactData, setContactData] = useState({
+    address: '',
+    phone: '',
+    telegram: '',
+    contactEmail: '',
+  });
+
   const updateProfileMutation = useMutation({
     mutationFn: authApi.updateProfile,
     onSuccess: (updatedUser) => {
       toast.success('Профиль обновлен');
-      // Обновляем локальное состояние формы
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
       if (updatedUser) {
         setFormData({
           firstName: updatedUser.firstName || '',
@@ -43,6 +53,17 @@ export const Settings = () => {
     },
   });
 
+  const updateSettingsMutation = useMutation({
+    mutationFn: settingsApi.update,
+    onSuccess: () => {
+      toast.success('Контактная информация обновлена');
+      queryClient.invalidateQueries({ queryKey: ['settings'] });
+    },
+    onError: () => {
+      toast.error('Ошибка при обновлении контактной информации');
+    },
+  });
+
   useEffect(() => {
     if (user) {
       setFormData({
@@ -52,6 +73,17 @@ export const Settings = () => {
       });
     }
   }, [user]);
+
+  useEffect(() => {
+    if (settings) {
+      setContactData({
+        address: settings.address || '',
+        phone: settings.phone || '',
+        telegram: settings.telegram || '',
+        contactEmail: settings.email || '',
+      });
+    }
+  }, [settings]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +95,22 @@ export const Settings = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  if (isLoading) {
+  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setContactData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    updateSettingsMutation.mutate({
+      address: contactData.address,
+      phone: contactData.phone,
+      email: contactData.contactEmail,
+      telegram: contactData.telegram,
+    });
+  };
+
+  if (isLoading || isLoadingSettings) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -78,32 +125,7 @@ export const Settings = () => {
         <p className="text-slate-600 mt-1">Управление параметрами системы</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 space-y-2 sticky top-6">
-            {[
-              { id: 'profile', label: 'Профиль', icon: User },
-              { id: 'store', label: 'Магазин', icon: Store },
-              { id: 'notifications', label: 'Уведомления', icon: Bell },
-              { id: 'security', label: 'Безопасность', icon: Shield },
-              { id: 'appearance', label: 'Внешний вид', icon: Palette },
-              { id: 'language', label: 'Язык и регион', icon: Globe },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.id}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-slate-700 hover:bg-slate-50 rounded-xl transition-all"
-                >
-                  <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="lg:col-span-3 space-y-6">
+      <div className="space-y-6">
           {/* Profile Settings */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-3">
@@ -175,113 +197,72 @@ export const Settings = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center">
                 <Store className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-xl font-bold text-slate-900">Магазин</h2>
+              <h2 className="text-xl font-bold text-slate-900">Контактная информация</h2>
             </div>
             <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Название магазина</label>
-                <input
-                  type="text"
-                  defaultValue="OpticStyle"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Адрес</label>
-                <input
-                  type="text"
-                  defaultValue="Москва, ул. Примерная, д. 1"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Контактный телефон</label>
-                <input
-                  type="tel"
-                  defaultValue="+7 (495) 123-45-67"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div className="pt-4">
-                <Button className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200 transform hover:scale-[1.02]">
-                  <Save className="w-5 h-5" />
-                  Сохранить изменения
-                </Button>
-              </div>
+              <form onSubmit={handleContactSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-slate-700 mb-2">Адрес</label>
+                    <input
+                      type="text"
+                      id="address"
+                      name="address"
+                      value={contactData.address}
+                      onChange={handleContactChange}
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-2">Контактный телефон</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={contactData.phone}
+                      onChange={handleContactChange}
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="contactEmail" className="block text-sm font-medium text-slate-700 mb-2">Электронная почта</label>
+                    <input
+                      type="email"
+                      id="contactEmail"
+                      name="contactEmail"
+                      value={contactData.contactEmail}
+                      onChange={handleContactChange}
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="telegram" className="block text-sm font-medium text-slate-700 mb-2">Ссылка на Telegram</label>
+                    <input
+                      type="url"
+                      id="telegram"
+                      name="telegram"
+                      value={contactData.telegram}
+                      onChange={handleContactChange}
+                      placeholder="https://t.me/username"
+                      className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+                <div className="pt-4">
+                  <Button 
+                    type="submit"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:shadow-emerald-500/40 transition-all duration-200 transform hover:scale-[1.02]"
+                  >
+                    <Save className="w-5 h-5" />
+                    Сохранить изменения
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
 
-          {/* Notification Settings */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Bell className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-slate-900">Уведомления</h2>
-            </div>
-            <div className="p-6 space-y-4">
-              {[
-                { label: 'Email уведомления о новых заказах', checked: true },
-                { label: 'Push уведомления в браузере', checked: true },
-                { label: 'Уведомления о низком остатке товаров', checked: false },
-                { label: 'Еженедельный отчет о продажах', checked: true },
-              ].map((notification) => (
-                <label key={notification.label} className="flex items-center gap-3 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    defaultChecked={notification.checked}
-                    className="w-5 h-5 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 focus:ring-offset-0"
-                  />
-                  <span className="text-slate-700 group-hover:text-slate-900 transition-colors">
-                    {notification.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Security Settings */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-200 flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <h2 className="text-xl font-bold text-slate-900">Безопасность</h2>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Текущий пароль</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Новый пароль</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Подтвердите новый пароль</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
-                />
-              </div>
-              <div className="pt-4">
-                <Button className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-xl shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 transition-all duration-200 transform hover:scale-[1.02]">
-                  <Shield className="w-5 h-5" />
-                  Обновить пароль
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

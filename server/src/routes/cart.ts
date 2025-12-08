@@ -109,6 +109,14 @@ router.post('/add', [
       });
     }
 
+    // Check product status
+    if (product.status === 'OUT_OF_STOCK') {
+      return res.status(400).json({
+        success: false,
+        error: 'Product is out of stock'
+      });
+    }
+
     // Check if item already exists in cart
     const existingItem = await CartItem.findOne({
       userId: (req.user as any).userId,
@@ -117,11 +125,20 @@ router.post('/add', [
       color: color || null
     });
 
+    // Set price reservation (1 minute from now for testing)
+    const lockDuration = 1 * 60 * 1000; // 1 minute for testing (change to 30 * 60 * 1000 for production)
+    const priceLockedUntil = new Date(Date.now() + lockDuration);
+    const reservedPrice = product.status === 'PRE_ORDER' ? (product.basePrice || product.price) : product.price;
+
     if (existingItem) {
-      // Update quantity
+      // Update quantity and refresh price lock
       const updatedItem = await CartItem.findByIdAndUpdate(
         existingItem._id,
-        { quantity: existingItem.quantity + quantity },
+        { 
+          quantity: existingItem.quantity + quantity,
+          reservedPrice,
+          priceLockedUntil
+        },
         { new: true }
       ).populate({
         path: 'productId',
@@ -142,6 +159,8 @@ router.post('/add', [
             quantity: updatedItemObj.quantity,
             size: updatedItemObj.size,
             color: updatedItemObj.color,
+            reservedPrice: updatedItemObj.reservedPrice,
+            priceLockedUntil: updatedItemObj.priceLockedUntil,
             product: {
               ...updatedItemObj.productId,
               mainImage: updatedItemObj.productId.images?.find((img: any) => img.isMain)?.url || null,
@@ -152,13 +171,15 @@ router.post('/add', [
       });
     }
 
-    // Create new cart item
+    // Create new cart item with price reservation
     const cartItem = await CartItem.create({
       userId: (req.user as any).userId,
       productId,
       quantity,
       size: size || null,
-      color: color || null
+      color: color || null,
+      reservedPrice,
+      priceLockedUntil
     });
 
     // Populate the product data
@@ -319,8 +340,8 @@ router.post('/lock-prices', auth, async (req: Request, res: Response, next: Next
       });
     }
 
-    // Lock prices for 30 minutes
-    const lockDuration = 30 * 60 * 1000; // 30 minutes in milliseconds
+    // Lock prices for 1 minute (testing)
+    const lockDuration = 1 * 60 * 1000; // 1 minute for testing (change to 30 * 60 * 1000 for production)
     const priceLockedUntil = new Date(Date.now() + lockDuration);
 
     // Update all cart items with reserved prices
@@ -366,6 +387,99 @@ router.post('/unlock-prices', auth, async (req: Request, res: Response, next: Ne
     res.json({
       success: true,
       message: 'Price locks removed'
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Validate cart before checkout
+router.post('/validate', auth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cartItems = await CartItem.find({ userId: (req.user as any).userId })
+      .populate('productId');
+
+    if (cartItems.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Cart is empty'
+      });
+    }
+
+    const now = new Date();
+    const issues: any[] = [];
+    const validItems: any[] = [];
+    
+    // Set price reservation (1 minute from now for testing)
+    const lockDuration = 1 * 60 * 1000; // 1 minute for testing
+    const priceLockedUntil = new Date(Date.now() + lockDuration);
+
+    for (const item of cartItems) {
+      const product = item.productId as any;
+      const issue: any = {
+        itemId: item._id,
+        productId: product._id,
+        productName: product.name,
+        quantity: item.quantity
+      };
+
+      // Check if product is out of stock
+      if (product.status === 'OUT_OF_STOCK') {
+        issue.type = 'OUT_OF_STOCK';
+        issue.message = `Товар "${product.name}" отсутствует в наличии`;
+        issues.push(issue);
+        continue;
+      }
+
+      // Check if price has changed and reservation expired
+      if (item.reservedPrice && item.priceLockedUntil) {
+        const lockDate = new Date(item.priceLockedUntil);
+        const isLockExpired = lockDate <= now;
+        const priceChanged = item.reservedPrice !== product.price;
+
+        if (isLockExpired && priceChanged) {
+          issue.type = 'PRICE_CHANGED';
+          issue.oldPrice = item.reservedPrice;
+          issue.newPrice = product.price;
+          issue.message = `Цена товара "${product.name}" изменилась с ${item.reservedPrice}₽ на ${product.price}₽`;
+          issues.push(issue);
+          
+          // Update reservation with new price for this item
+          await CartItem.findByIdAndUpdate(
+            item._id,
+            {
+              reservedPrice: product.price,
+              priceLockedUntil
+            }
+          );
+          
+          continue;
+        }
+      }
+
+      // Item is valid
+      const lockDate = item.priceLockedUntil ? new Date(item.priceLockedUntil) : null;
+      const useReservedPrice = item.reservedPrice && lockDate && lockDate > now;
+      
+      validItems.push({
+        itemId: item._id,
+        productId: product._id,
+        productName: product.name,
+        quantity: item.quantity,
+        price: useReservedPrice ? item.reservedPrice : product.price,
+        status: product.status
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        isValid: issues.length === 0,
+        issues,
+        validItems,
+        totalIssues: issues.length,
+        totalValidItems: validItems.length
+      }
     });
   } catch (error) {
     next(error);

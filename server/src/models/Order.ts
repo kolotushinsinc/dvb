@@ -4,18 +4,31 @@ export interface IOrderItem {
   productId: Types.ObjectId;
   quantity: number;
   price: number;
+  reservedPrice?: number; // Зарезервированная цена
   size?: string;
   color?: string;
+}
+
+export interface IPriceReservation {
+  reservedAt: Date;
+  expiresAt: Date; // +30 минут
+  reservedPrices: {
+    productId: Types.ObjectId;
+    price: number;
+  }[];
+  isExpired: boolean;
 }
 
 export interface IOrder extends Document {
   orderNumber: string;
   userId?: Types.ObjectId;
   status: 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED';
+  orderType: 'INSTANT' | 'PRE_ORDER'; // Тип заказа
   totalAmount: number;
   shippingCost: number;
   taxAmount: number;
   discountAmount: number;
+  priceReservation?: IPriceReservation; // Бронирование цен
   
   // Customer Info
   customerEmail: string;
@@ -70,6 +83,10 @@ const orderItemSchema = new Schema<IOrderItem>({
     required: true,
     min: 0
   },
+  reservedPrice: {
+    type: Number,
+    min: 0
+  },
   size: {
     type: String,
     trim: true
@@ -77,6 +94,34 @@ const orderItemSchema = new Schema<IOrderItem>({
   color: {
     type: String,
     trim: true
+  }
+});
+
+const priceReservationSchema = new Schema<IPriceReservation>({
+  reservedAt: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
+  expiresAt: {
+    type: Date,
+    required: true
+  },
+  reservedPrices: [{
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product',
+      required: true
+    },
+    price: {
+      type: Number,
+      required: true,
+      min: 0
+    }
+  }],
+  isExpired: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -94,6 +139,11 @@ const orderSchema = new Schema<IOrder>({
     type: String,
     enum: ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED'],
     default: 'PENDING'
+  },
+  orderType: {
+    type: String,
+    enum: ['INSTANT', 'PRE_ORDER'],
+    default: 'INSTANT'
   },
   totalAmount: {
     type: Number,
@@ -115,6 +165,7 @@ const orderSchema = new Schema<IOrder>({
     default: 0,
     min: 0
   },
+  priceReservation: priceReservationSchema,
   customerEmail: {
     type: String,
     required: true,

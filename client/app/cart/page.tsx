@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,10 @@ import { Minus, Plus, Trash2, ArrowRight, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/components/cart/CartProvider';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { api } from '@/lib/api';
+import { api, CartValidationIssue } from '@/lib/api';
 import { getColorByName } from '@/lib/colors';
 import { LazyImage } from '@/components/ui/LazyImage';
+import { CartValidationModal } from '@/components/cart/CartValidationModal';
 
 const CartPage = () => {
   const { items, totalItems, totalQuantity, totalPrice, loading, error, removeItem, updateQuantity, clearCart } = useCart();
@@ -31,6 +33,36 @@ const CartPage = () => {
   const [discount, setDiscount] = useState(0);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [isClearCartDialogOpen, setIsClearCartDialogOpen] = useState(false);
+  const [validationIssues, setValidationIssues] = useState<CartValidationIssue[]>([]);
+  const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
+  const [lastValidationHash, setLastValidationHash] = useState<string>('');
+
+  // Listen for cart validation events from CartProvider
+  useEffect(() => {
+    const handleValidationRequired = (event: CustomEvent) => {
+      const { issues } = event.detail;
+      
+      // Create a hash of the issues to prevent showing the same modal multiple times
+      const issuesHash = JSON.stringify(issues.map((i: CartValidationIssue) => ({
+        itemId: i.itemId,
+        type: i.type,
+        newPrice: i.newPrice
+      })));
+      
+      // Only show modal if issues have changed
+      if (issuesHash !== lastValidationHash) {
+        setValidationIssues(issues);
+        setIsValidationModalOpen(true);
+        setLastValidationHash(issuesHash);
+      }
+    };
+
+    window.addEventListener('cart-validation-required', handleValidationRequired as EventListener);
+
+    return () => {
+      window.removeEventListener('cart-validation-required', handleValidationRequired as EventListener);
+    };
+  }, [lastValidationHash]);
 
   const handleQuantityChange = async (id: string, quantity: number, size?: string, color?: string) => {
     if (quantity < 1) {
@@ -77,15 +109,95 @@ const CartPage = () => {
     }
   };
 
-  const handleCheckout = () => {
+  const router = useRouter();
+  
+  const handleCheckout = async () => {
     if (items.length === 0) {
       toast.error('Корзина пуста');
       return;
     }
 
     setIsCheckingOut(true);
-    // Use Next.js router for navigation
+
+    try {
+      // Try to validate cart before checkout (only for authenticated users)
+      try {
+        const validation = await api.cart.validate();
+        
+        if (!validation.isValid) {
+          // Show validation modal with issues
+          setValidationIssues(validation.issues);
+          setIsValidationModalOpen(true);
+          setIsCheckingOut(false);
+          return;
+        }
+      } catch (validationError: any) {
+        // If validation fails due to auth, just proceed to checkout
+        console.log('Validation skipped (user not authenticated or error):', validationError);
+      }
+
+      // If validation passed or skipped, proceed to checkout using Next.js router
+      router.push('/checkout');
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast.error('Ошибка при переходе к оформлению');
+      setIsCheckingOut(false);
+    }
+  };
+
+  const handleRemoveIssueItem = async (itemId: string) => {
+    await removeItem(itemId);
+    
+    // Re-validate after removing item
+    const validation = await api.cart.validate();
+    setValidationIssues(validation.issues);
+    
+    // Update hash to prevent re-showing the same modal
+    const issuesHash = JSON.stringify(validation.issues.map((i: CartValidationIssue) => ({
+      itemId: i.itemId,
+      type: i.type,
+      newPrice: i.newPrice
+    })));
+    setLastValidationHash(issuesHash);
+    
+    // Close modal if no more issues
+    if (validation.isValid) {
+      setIsValidationModalOpen(false);
+      toast.success('Проблемные товары удалены');
+    }
+  };
+
+  const handleContinueWithNewPrices = async () => {
+    setIsValidationModalOpen(false);
+    
+    // Reset hash to allow new validations in the future
+    setLastValidationHash('');
+    
+    // Refresh cart to get new reservation timers
+    try {
+      const cartResponse = await api.cart.get();
+      // Cart will be updated automatically through CartProvider
+    } catch (error) {
+      console.error('Failed to refresh cart:', error);
+    }
+    
+    // Proceed to checkout
     window.location.href = '/checkout';
+  };
+
+  const handleStayInCart = async () => {
+    setIsValidationModalOpen(false);
+    
+    // Reset hash to allow new validations in the future
+    setLastValidationHash('');
+    
+    // Refresh cart to start new reservation timers
+    try {
+      await api.cart.get();
+      toast.success('Корзина обновлена. Новая резервация цен началась.');
+    } catch (error) {
+      console.error('Failed to refresh cart:', error);
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -288,12 +400,28 @@ const CartPage = () => {
                           </div>
 
                           <div className="text-right">
-                            <p className="font-bold text-xl text-charcoal-800">
-                              {formatPrice(item.product.price * item.quantity)}
-                            </p>
-                            <p className="text-sm text-charcoal-500 mt-1">
-                              {formatPrice(item.product.price)} × {item.quantity}
-                            </p>
+                            {item.isPriceLocked && item.reservedPrice ? (
+                              <>
+                                <p className="font-bold text-xl text-charcoal-800">
+                                  {formatPrice(item.reservedPrice * item.quantity)}
+                                </p>
+                                <p className="text-sm text-charcoal-500 mt-1">
+                                  {formatPrice(item.reservedPrice)} × {item.quantity}
+                                </p>
+                                <p className="text-xs text-green-600 mt-1">
+                                  Цена зафиксирована
+                                </p>
+                              </>
+                            ) : (
+                              <>
+                                <p className="font-bold text-xl text-charcoal-800">
+                                  {formatPrice(item.product.price * item.quantity)}
+                                </p>
+                                <p className="text-sm text-charcoal-500 mt-1">
+                                  {formatPrice(item.product.price)} × {item.quantity}
+                                </p>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -421,6 +549,15 @@ const CartPage = () => {
       </div>
 
       <Footer />
+
+      {/* Validation Modal */}
+      <CartValidationModal
+        isOpen={isValidationModalOpen}
+        onClose={() => setIsValidationModalOpen(false)}
+        issues={validationIssues}
+        onRemoveItem={handleRemoveIssueItem}
+        onContinue={handleContinueWithNewPrices}
+      />
     </div>
   );
 };

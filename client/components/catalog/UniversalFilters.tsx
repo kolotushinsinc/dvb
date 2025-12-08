@@ -711,22 +711,24 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
       </div>
 
       {/* Filters Sidebar */}
-      <div className={`${showFilters ? 'fixed inset-0 z-40 bg-white p-6 lg:relative lg:inset-auto lg:z-auto lg:bg-transparent lg:p-0' : 'hidden'} lg:block w-full lg:w-80 lg:flex-shrink-0`}>
-        {showFilters && (
-          <div className="lg:hidden flex justify-between items-center mb-6">
-            <h2 className="font-heading text-2xl font-bold text-charcoal-800">Фильтры</h2>
-            <Button
-              onClick={() => setShowFilters(false)}
-              variant="ghost"
-              size="icon"
-              className="hover:bg-primary-50 hover:text-primary-500"
-            >
-              <X className="w-5 h-5" />
-            </Button>
+      <div className={`${showFilters ? 'fixed inset-0 z-40 bg-white overflow-y-auto lg:relative lg:inset-auto lg:z-auto lg:bg-transparent lg:overflow-visible' : 'hidden'} lg:block w-full lg:w-80 lg:flex-shrink-0`}>
+        <div className="p-6 lg:p-0">
+          {showFilters && (
+            <div className="lg:hidden flex justify-between items-center mb-6 sticky top-0 bg-white z-10 pb-4 border-b border-secondary-100">
+              <h2 className="font-heading text-2xl font-bold text-charcoal-800">Фильтры</h2>
+              <Button
+                onClick={() => setShowFilters(false)}
+                variant="ghost"
+                size="icon"
+                className="hover:bg-primary-50 hover:text-primary-500"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+          )}
+          <div className="lg:bg-white lg:rounded-2xl lg:p-8 lg:shadow-lg lg:border lg:border-secondary-100 premium-shadow">
+            <FilterSection />
           </div>
-        )}
-        <div className="lg:bg-white lg:rounded-2xl lg:p-8 lg:shadow-lg lg:border lg:border-secondary-100 premium-shadow">
-          <FilterSection />
         </div>
       </div>
     </>

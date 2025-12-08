@@ -253,7 +253,7 @@ const NewProductsPage = () => {
           </p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Mobile Filter Toggle */}
           <div className="lg:hidden fixed bottom-4 right-4 z-50">
             <Button
@@ -266,7 +266,7 @@ const NewProductsPage = () => {
           </div>
 
           {/* Filters Sidebar */}
-          <div className={`${showFilters ? 'fixed inset-0 z-40 bg-white p-6 overflow-y-auto' : 'hidden'} lg:block lg:w-64 flex-shrink-0`}>
+          <div className={`${showFilters ? 'fixed inset-0 z-40 bg-white p-6 overflow-y-auto' : 'hidden'} lg:block lg:w-80 flex-shrink-0`}>
             <div className="lg:hidden flex justify-between items-center mb-6">
               <h2 className="text-xl font-bold">Фильтры</h2>
               <Button
@@ -281,13 +281,13 @@ const NewProductsPage = () => {
           </div>
 
           {/* Products Grid */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Sorting and Controls */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-600">Сортировка:</span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                <span className="text-gray-600 text-sm sm:text-base">Сортировка:</span>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-full sm:w-48">
                     <SelectValue placeholder="Выберите сортировку" />
                   </SelectTrigger>
                   <SelectContent>

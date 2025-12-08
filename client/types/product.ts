@@ -207,4 +207,8 @@ export interface CartItem {
   quantity: number;
   size?: string;
   color?: string;
+  reservedPrice?: number;
+  priceLockedUntil?: string;
+  isPriceLocked?: boolean;
+  priceChanged?: boolean;
 }

@@ -1,12 +1,38 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import { useCategories } from '@/contexts/CategoriesContext';
+import { api } from '@/lib/api';
 
 const Footer = () => {
   const { categories } = useCategories(); // Use the categories context
   const currentYear = new Date().getFullYear();
+  const [settings, setSettings] = useState({
+    address: 'г. Находка, ул. Ленинская 10, офис 10',
+    phone: '+7 (914) 731-99-09',
+    email: 'siriusdark999@yandex.ru',
+    telegram: ''
+  });
+
+  useEffect(() => {
+    // Fetch settings from API
+    const fetchSettings = async () => {
+      try {
+        const data = await api.settings.get();
+        setSettings({
+          address: data.address || 'г. Находка, ул. Ленинская 10, офис 10',
+          phone: data.phone || '+7 (914) 731-99-09',
+          email: data.email || 'siriusdark999@yandex.ru',
+          telegram: data.telegram || ''
+        });
+      } catch (error) {
+        console.error('Error fetching settings:', error);
+      }
+    };
+    fetchSettings();
+  }, []);
 
   return (
     <footer className="bg-white border-t border-secondary-100 shadow-sm">
@@ -83,20 +109,33 @@ const Footer = () => {
                 <div className="w-8 h-8 bg-primary-50 rounded-full flex items-center justify-center">
                   <Phone className="w-4 h-4 text-primary-500" />
                 </div>
-                <span className="text-charcoal-600">+7 (914) 731-99-09 (круглосуточно)</span>
+                <span className="text-charcoal-600">{settings.phone} (круглосуточно)</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gold-50 rounded-full flex items-center justify-center">
                   <Mail className="w-4 h-4 text-gold-500" />
                 </div>
-                <span className="text-charcoal-600">siriusdark999@yandex.ru</span>
+                <span className="text-charcoal-600">{settings.email}</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-accent-50 rounded-full flex items-center justify-center">
                   <MapPin className="w-4 h-4 text-accent-500" />
                 </div>
-                <span className="text-charcoal-600">г. Находка, ул. Ленинская 10, офис 10, Россия</span>
+                <span className="text-charcoal-600">{settings.address}, Россия</span>
               </div>
+              {settings.telegram && (
+                <Link 
+                  href={settings.telegram} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#0088cc] hover:bg-[#0077b3] text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.869 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.941z"/>
+                  </svg>
+                  <span className="font-medium">Telegram</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>

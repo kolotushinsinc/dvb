@@ -19,6 +19,7 @@ import reviewRoutes from './routes/reviews';
 import uploadRoutes from './routes/upload';
 import adminRoutes from './routes/admin';
 import adminReviewRoutes from './routes/admin-reviews';
+import settingsRoutes from './routes/settings';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -77,12 +78,13 @@ app.use((req, res, next) => {
   }
   
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
   res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Max-Age', '86400'); // Cache preflight for 24 hours
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(204).end();
   }
   
   next();
@@ -130,6 +132,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/reviews', adminReviewRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Error handling middleware
 app.use(notFound);

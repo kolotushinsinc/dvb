@@ -5,7 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Star, Heart, Eye, Search, Grid3x3, List } from 'lucide-react';
+import { Star, Heart, Eye, Search, Grid3x3, List, ShoppingBag } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useCategories } from '@/contexts/CategoriesContext';
 import { useProducts, useFilteredProducts } from '@/hooks/useProducts';
@@ -111,22 +111,24 @@ const CatalogPage = () => {
           </p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Universal Filters Component */}
-          <UniversalFilters
-            categories={categories}
-            products={products}
-            onFilterChange={(filters) => setFilterState(filters)}
-          />
+          <div className="lg:w-80 flex-shrink-0">
+            <UniversalFilters
+              categories={categories}
+              products={products}
+              onFilterChange={(filters) => setFilterState(filters)}
+            />
+          </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Sort Controls */}
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center space-x-4">
-                <span className="text-charcoal-600">Сортировать:</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                <span className="text-charcoal-600 text-sm sm:text-base">Сортировать:</span>
                 <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                  <SelectTrigger className="w-48 border-secondary-200 bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl">
+                  <SelectTrigger className="w-full sm:w-48 border-secondary-200 bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -140,7 +142,7 @@ const CatalogPage = () => {
               </div>
               
               {/* View Mode Toggle */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 hidden sm:flex">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-all duration-200 ${
@@ -185,13 +187,27 @@ const CatalogPage = () => {
                       {/* Product Image */}
                       <div className="relative overflow-hidden bg-secondary-50 h-72">
                         <Link href={`/product/${product.slug}`}>
-                          <OptimizedImage
-                            src={product.mainImage || '/placeholder-product.jpg'}
-                            alt={product.name}
-                            width={500}
-                            height={280}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
+                          {product.mainImage ? (
+                            <OptimizedImage
+                              src={product.mainImage}
+                              alt={product.name}
+                              width={500}
+                              height={280}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : product.images && product.images.length > 0 ? (
+                            <OptimizedImage
+                              src={product.images[0].url}
+                              alt={product.name}
+                              width={500}
+                              height={280}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-secondary-100">
+                              <ShoppingBag className="h-12 w-12 text-secondary-400" />
+                            </div>
+                          )}
                         </Link>
                         
                         {/* Badges */}
@@ -287,13 +303,27 @@ const CatalogPage = () => {
                       {/* Product Image */}
                       <div className="relative w-48 h-48 flex-shrink-0 bg-secondary-50">
                         <Link href={`/product/${product.slug}`}>
-                          <OptimizedImage
-                            src={product.mainImage || '/placeholder-product.jpg'}
-                            alt={product.name}
-                            width={200}
-                            height={200}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
+                          {product.mainImage ? (
+                            <OptimizedImage
+                              src={product.mainImage}
+                              alt={product.name}
+                              width={200}
+                              height={200}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : product.images && product.images.length > 0 ? (
+                            <OptimizedImage
+                              src={product.images[0].url}
+                              alt={product.name}
+                              width={200}
+                              height={200}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-secondary-100">
+                              <ShoppingBag className="h-8 w-8 text-secondary-400" />
+                            </div>
+                          )}
                         </Link>
                         
                         {/* Badges */}

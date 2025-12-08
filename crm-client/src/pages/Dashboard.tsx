@@ -50,6 +50,9 @@ export const Dashboard = () => {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
     queryFn: dashboardApi.getStats,
+    refetchOnWindowFocus: true, // Обновление при фокусе на окне
+    refetchOnMount: true, // Обновление при монтировании компонента
+    staleTime: 0, // Данные считаются устаревшими сразу
   });
 
   if (isLoading) {

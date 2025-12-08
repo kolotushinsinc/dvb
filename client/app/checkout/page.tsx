@@ -13,11 +13,13 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { CreditCard, Truck, Package, ArrowLeft, Shield, ShoppingBag, CheckCircle } from 'lucide-react';
 import { useCart } from '@/components/cart/CartProvider';
+import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { api } from '@/lib/api';
+import { api, CartValidationIssue } from '@/lib/api';
 import { getColorByName } from '@/lib/colors';
 import { LazyImage } from '@/components/ui/LazyImage';
+import { CartValidationModal } from '@/components/cart/CartValidationModal';
 
 interface CheckoutForm {
   // Contact Information
@@ -46,9 +48,12 @@ interface CheckoutForm {
 
 const CheckoutPage = () => {
   const router = useRouter();
-  const { items, totalPrice, loading, clearCart } = useCart();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { items, totalPrice, loading, clearCart, removeItem } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState(300);
+  const [validationIssues, setValidationIssues] = useState<CartValidationIssue[]>([]);
+  const [isValidationModalOpen, setIsValidationModalOpen] = useState(false);
   const [formData, setFormData] = useState<CheckoutForm>({
     email: '',
     phone: '',
@@ -67,6 +72,25 @@ const CheckoutPage = () => {
     notes: ''
   });
 
+  // Check if user is authenticated - only redirect if loading is complete and user is not authenticated
+  useEffect(() => {
+    console.log('Auth check:', { authLoading, isAuthenticated });
+    
+    // Only check after auth loading is complete
+    if (authLoading) {
+      console.log('Auth still loading, waiting...');
+      return;
+    }
+    
+    if (!isAuthenticated) {
+      console.log('Redirecting to cart - user not authenticated');
+      toast.error('Для оформления заказа необходимо войти в систему');
+      router.push('/cart');
+    } else {
+      console.log('User is authenticated, showing checkout page');
+    }
+  }, [isAuthenticated, authLoading, router]);
+
   // Check if cart is empty
   useEffect(() => {
     if (!loading && items.length === 0) {
@@ -79,6 +103,44 @@ const CheckoutPage = () => {
   useEffect(() => {
     setDeliveryFee(totalPrice > 5000 ? 0 : 300);
   }, [totalPrice]);
+
+  // Listen for cart validation events from CartProvider
+  useEffect(() => {
+    const handleValidationRequired = (event: CustomEvent) => {
+      const { issues } = event.detail;
+      setValidationIssues(issues);
+      setIsValidationModalOpen(true);
+    };
+
+    window.addEventListener('cart-validation-required', handleValidationRequired as EventListener);
+
+    return () => {
+      window.removeEventListener('cart-validation-required', handleValidationRequired as EventListener);
+    };
+  }, []);
+
+  const handleRemoveIssueItem = async (itemId: string) => {
+    await removeItem(itemId);
+    
+    // Re-validate after removing item
+    try {
+      const validation = await api.cart.validate();
+      setValidationIssues(validation.issues);
+      
+      // Close modal if no more issues
+      if (validation.isValid) {
+        setIsValidationModalOpen(false);
+        toast.success('Проблемные товары удалены');
+      }
+    } catch (error) {
+      console.error('Validation error:', error);
+    }
+  };
+
+  const handleContinueWithNewPrices = () => {
+    setIsValidationModalOpen(false);
+    toast.info('Цены обновлены. Вы можете продолжить оформление заказа.');
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -115,11 +177,11 @@ const CheckoutPage = () => {
     try {
       setIsSubmitting(true);
       
-      // Prepare order data
+      // Prepare order data - use reserved price if locked, otherwise current price
       const orderItems = items.map(item => ({
         productId: item.product._id,
         quantity: item.quantity,
-        price: item.product.price,
+        price: item.isPriceLocked && item.reservedPrice ? item.reservedPrice : item.product.price,
         size: item.size,
         color: item.color
       }));
@@ -166,7 +228,7 @@ const CheckoutPage = () => {
 
   const finalTotal = totalPrice + deliveryFee;
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-cream-50 to-white flex items-center justify-center">
         <div className="text-center">
@@ -181,7 +243,7 @@ const CheckoutPage = () => {
     );
   }
 
-  if (items.length === 0) {
+  if (!isAuthenticated || items.length === 0) {
     return null; // Will redirect to cart page
   }
 
@@ -519,8 +581,13 @@ const CheckoutPage = () => {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium truncate text-charcoal-800">{item.product.name}</p>
                         <p className="text-sm text-charcoal-500">
-                          {item.quantity} × {formatPrice(item.product.price)}
+                          {item.quantity} × {formatPrice(item.isPriceLocked && item.reservedPrice ? item.reservedPrice : item.product.price)}
                         </p>
+                        {item.isPriceLocked && item.reservedPrice && (
+                          <p className="text-xs text-green-600 mt-0.5">
+                            Цена зафиксирована
+                          </p>
+                        )}
                         {(item.size || item.color) && (
                           <div className="flex gap-2 mt-1 items-center">
                             {item.size && (
@@ -545,7 +612,9 @@ const CheckoutPage = () => {
                         )}
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-charcoal-800">{formatPrice(item.product.price * item.quantity)}</p>
+                        <p className="font-medium text-charcoal-800">
+                          {formatPrice((item.isPriceLocked && item.reservedPrice ? item.reservedPrice : item.product.price) * item.quantity)}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -593,6 +662,15 @@ const CheckoutPage = () => {
       </div>
 
       <Footer />
+
+      {/* Validation Modal */}
+      <CartValidationModal
+        isOpen={isValidationModalOpen}
+        onClose={() => setIsValidationModalOpen(false)}
+        issues={validationIssues}
+        onRemoveItem={handleRemoveIssueItem}
+        onContinue={handleContinueWithNewPrices}
+      />
     </div>
   );
 };

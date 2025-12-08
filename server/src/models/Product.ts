@@ -76,6 +76,9 @@ export interface IProduct extends Document {
   originalPrice?: number;
   sku?: string;
   stock: number;
+  status: 'IN_STOCK' | 'PRE_ORDER' | 'OUT_OF_STOCK' | 'IN_TRANSIT';
+  deliveryTime?: string; // Для статуса IN_TRANSIT
+  basePrice?: number; // Для статуса PRE_ORDER (цена "от")
   weight?: number;
   dimensions?: string;
   brand?: string;
@@ -181,6 +184,19 @@ const productSchema = new Schema<IProduct>({
   stock: {
     type: Number,
     default: 0,
+    min: 0
+  },
+  status: {
+    type: String,
+    enum: ['IN_STOCK', 'PRE_ORDER', 'OUT_OF_STOCK', 'IN_TRANSIT'],
+    default: 'IN_STOCK'
+  },
+  deliveryTime: {
+    type: String,
+    trim: true
+  },
+  basePrice: {
+    type: Number,
     min: 0
   },
   weight: {

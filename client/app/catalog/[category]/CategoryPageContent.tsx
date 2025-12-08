@@ -175,23 +175,25 @@ function CategoryPageContent() {
           </p>
         </div>
 
-        <div className="flex gap-8">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Universal Filters Component */}
-          <UniversalFilters
-            categories={categories}
-            products={products}
-            onFilterChange={(filters) => setFilterState(filters)}
-            initialCategory={currentCategory?._id}
-          />
+          <div className="lg:w-80 flex-shrink-0">
+            <UniversalFilters
+              categories={categories}
+              products={products}
+              onFilterChange={(filters) => setFilterState(filters)}
+              initialCategory={currentCategory?._id}
+            />
+          </div>
 
           {/* Main Content */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {/* Sort Controls */}
-            <div className="flex justify-between items-center mb-6">
-              <div className="flex items-center space-x-4">
-                <span className="text-charcoal-600">Сортировать:</span>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                <span className="text-charcoal-600 text-sm sm:text-base">Сортировать:</span>
                 <Select value={sortBy} onValueChange={(value: any) => setSortBy(value)}>
-                  <SelectTrigger className="w-48 border-secondary-200 bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl">
+                  <SelectTrigger className="w-full sm:w-48 border-secondary-200 bg-secondary-50 focus:border-primary-300 focus:ring-primary-200 focus:bg-white rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -205,7 +207,7 @@ function CategoryPageContent() {
               </div>
               
               {/* View Mode Toggle */}
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 hidden sm:flex">
                 <button
                   onClick={() => setViewMode('grid')}
                   className={`p-2 rounded-lg transition-all duration-200 ${

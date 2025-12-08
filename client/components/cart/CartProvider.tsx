@@ -39,6 +39,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [validationShown, setValidationShown] = useState(false);
 
   // Load cart from API on mount or when auth status changes
   useEffect(() => {
@@ -81,10 +82,53 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     loadCart();
   }, [isAuthenticated]);
 
+  // Separate effect for price lock checking
+  useEffect(() => {
+    if (!isAuthenticated || items.length === 0) {
+      return;
+    }
+
+    // Check for price lock expiration every 10 seconds
+    const checkInterval = setInterval(async () => {
+      // Check if any items have expired price locks
+      const now = new Date();
+      const hasExpiredLocks = items.some(item => {
+        if (item.priceLockedUntil) {
+          const lockDate = new Date(item.priceLockedUntil);
+          return lockDate <= now && item.isPriceLocked;
+        }
+        return false;
+      });
+      
+      if (hasExpiredLocks) {
+        console.log('Price locks expired, triggering validation...');
+        
+        // Refresh cart to get updated prices
+        await refreshCart();
+        
+        // Trigger validation and show modal
+        try {
+          const validation = await api.cart.validate();
+          
+          if (!validation.isValid && validation.issues.length > 0) {
+            // Dispatch custom event to show validation modal
+            window.dispatchEvent(new CustomEvent('cart-validation-required', {
+              detail: { issues: validation.issues }
+            }));
+          }
+        } catch (error) {
+          console.error('Validation error after price lock expiration:', error);
+        }
+      }
+    }, 10000); // Check every 10 seconds
+
+    return () => clearInterval(checkInterval);
+  }, [isAuthenticated, items.length]); // Only depend on auth and items count, not items themselves
+
   // Convert API cart item to local type
   const convertAPIToLocalCartItem = (item: APICartItem): CartItem => ({
     ...item,
-    _id: item.product._id // Use product ID as unique identifier
+    _id: (item as any).id || item._id // Use cart item ID from server
   });
 
   // Save cart to localStorage
@@ -256,7 +300,14 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
   const totalItems = items.length;
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  
+  // Calculate total price using reserved prices if locked, otherwise use current price
+  const totalPrice = items.reduce((sum, item) => {
+    const price = item.isPriceLocked && item.reservedPrice 
+      ? item.reservedPrice 
+      : item.product.price;
+    return sum + (price * item.quantity);
+  }, 0);
 
   return (
     <CartContext.Provider value={{
