@@ -262,7 +262,7 @@ const CartPage = () => {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               <Card className="border-secondary-100 shadow-lg premium-shadow rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-cream-50 to-white border-b border-secondary-100">
+                <CardHeader className="bg-white border-b border-secondary-100">
                   <CardTitle className="flex items-center justify-between text-charcoal-800">
                     <span className="font-heading">Товары в корзине</span>
                     <Dialog open={isClearCartDialogOpen} onOpenChange={setIsClearCartDialogOpen}>
@@ -447,7 +447,7 @@ const CartPage = () => {
             {/* Order Summary */}
             <div className="lg:col-span-1">
               <Card className="sticky top-8 border-secondary-100 shadow-lg premium-shadow rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-cream-50 to-white border-b border-secondary-100">
+                <CardHeader className="bg-white border-b border-secondary-100">
                   <CardTitle className="text-charcoal-800 font-heading">Итого</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-5 pt-6">

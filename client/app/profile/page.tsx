@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, ShoppingBag, Heart, MapPin, CreditCard, LogOut, Edit } from 'lucide-react';
+import { User, ShoppingBag, Heart, MapPin, CreditCard, LogOut, Edit, MessageCircle } from 'lucide-react';
 import { api, Order } from '@/lib/api';
 import { Product } from '@/types/product';
 import { toast } from 'sonner';
@@ -50,6 +50,7 @@ const ProfilePage = () => {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [editForm, setEditForm] = useState({
     firstName: '',
     lastName: '',
@@ -107,6 +108,23 @@ const ProfilePage = () => {
         } catch (err) {
           console.error('Failed to load favorites:', err);
           setFavorites([]);
+        }
+
+        // Get unread messages count
+        try {
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+          const token = localStorage.getItem('authToken');
+          const response = await fetch(`${apiUrl}/api/chat/my-chat`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (response.ok) {
+            const chatData = await response.json();
+            setUnreadCount(chatData.unreadByClientCount || 0);
+          }
+        } catch (err) {
+          console.error('Failed to load unread count:', err);
         }
       } catch (err) {
         toast.error('Не удалось загрузить данные профиля');
@@ -177,17 +195,22 @@ const ProfilePage = () => {
   };
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pending':
+    const statusUpper = status.toUpperCase();
+    switch (statusUpper) {
+      case 'PENDING':
+        return 'В ожидании';
+      case 'CONFIRMED':
+        return 'Подтвержден';
+      case 'PROCESSING':
         return 'В обработке';
-      case 'processing':
-        return 'Собирается';
-      case 'shipped':
+      case 'SHIPPED':
         return 'Отправлен';
-      case 'delivered':
+      case 'DELIVERED':
         return 'Доставлен';
-      case 'cancelled':
+      case 'CANCELLED':
         return 'Отменен';
+      case 'REFUNDED':
+        return 'Возвращен';
       default:
         return status;
     }
@@ -318,10 +341,21 @@ const ProfilePage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="orders" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="orders" className="flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4" />
                   Мои заказы
+                </TabsTrigger>
+                <TabsTrigger value="support" className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4" />
+                  <span className="relative inline-flex items-center">
+                    Поддержка
+                    {unreadCount > 0 && (
+                      <span className="ml-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </span>
                 </TabsTrigger>
                 <TabsTrigger value="favorites" className="flex items-center gap-2">
                   <Heart className="h-4 w-4" />
@@ -365,22 +399,49 @@ const ProfilePage = () => {
                                   <p className="text-sm text-gray-500">Количество: {item.quantity}</p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-medium">{formatPrice(item.price)}</p>
+                                  <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
                                 </div>
                               </div>
                             ))}
                             <Separator />
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">Итого:</span>
-                              <span className="font-bold text-lg">{formatPrice(order.total)}</span>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Товары:</span>
+                                <span>{formatPrice(order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0))}</span>
+                              </div>
+                              {(order.shippingCost || 0) > 0 && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Доставка:</span>
+                                  <span>{formatPrice(order.shippingCost || 0)}</span>
+                                </div>
+                              )}
+                              {(order.taxAmount || 0) > 0 && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-600">Налог:</span>
+                                  <span>{formatPrice(order.taxAmount || 0)}</span>
+                                </div>
+                              )}
+                              {(order.discountAmount || 0) > 0 && (
+                                <div className="flex justify-between text-sm text-green-600">
+                                  <span>Скидка:</span>
+                                  <span>-{formatPrice(order.discountAmount || 0)}</span>
+                                </div>
+                              )}
+                              <Separator />
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium">Итого:</span>
+                                <span className="font-bold text-lg">{formatPrice(order.totalAmount || 0)}</span>
+                              </div>
                             </div>
                             <div className="flex justify-end gap-2">
                               <Button variant="outline" size="sm">
                                 Повторить заказ
                               </Button>
-                              <Button size="sm">
-                                Отследить заказ
-                              </Button>
+                              {order.status.toUpperCase() !== 'DELIVERED' && order.status.toUpperCase() !== 'CANCELLED' && order.status.toUpperCase() !== 'REFUNDED' && (
+                                <Button size="sm">
+                                  Отследить заказ
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </CardContent>
@@ -399,6 +460,25 @@ const ProfilePage = () => {
                     </CardContent>
                   </Card>
                 )}
+              </TabsContent>
+
+              <TabsContent value="support" className="mt-6">
+                <Card>
+                  <CardContent className="text-center py-12">
+                    <MessageCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Чат с поддержкой</h3>
+                    {unreadCount > 0 ? (
+                      <p className="text-red-500 font-medium mb-6">
+                        У вас {unreadCount} {unreadCount === 1 ? 'непрочитанное сообщение' : 'непрочитанных сообщения'}
+                      </p>
+                    ) : (
+                      <p className="text-gray-500 mb-6">Свяжитесь с нашей командой поддержки</p>
+                    )}
+                    <Link href="/support">
+                      <Button>Открыть чат</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="favorites" className="mt-6">

@@ -9,6 +9,8 @@ import { Settings } from '@/pages/Settings'
 import { Login } from '@/pages/Login'
 import { Managers } from '@/pages/Managers'
 import Reviews from '@/pages/Reviews'
+import Chats from '@/pages/Chats'
+import Slider from '@/pages/Slider'
 import { Layout } from '@/components/Layout'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
@@ -33,6 +35,8 @@ function App() {
                     <Route path="/customers" element={<Customers />} />
                     <Route path="/managers" element={<Managers />} />
                     <Route path="/reviews" element={<Reviews />} />
+                    <Route path="/chats" element={<Chats />} />
+                    <Route path="/slider" element={<Slider />} />
                     <Route path="/settings" element={<Settings />} />
                   </Routes>
                 </Layout>

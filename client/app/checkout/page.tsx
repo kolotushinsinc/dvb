@@ -99,9 +99,9 @@ const CheckoutPage = () => {
     }
   }, [items, loading, router]);
 
-  // Calculate delivery fee based on total price
+  // Free delivery for all orders
   useEffect(() => {
-    setDeliveryFee(totalPrice > 5000 ? 0 : 300);
+    setDeliveryFee(0);
   }, [totalPrice]);
 
   // Listen for cart validation events from CartProvider
@@ -278,7 +278,7 @@ const CheckoutPage = () => {
           <div className="lg:col-span-2 space-y-8">
             {/* Contact Information */}
             <Card className="border-secondary-100 shadow-lg premium-shadow rounded-2xl overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-cream-50 to-white border-b border-secondary-100">
+              <CardHeader className="bg-white border-b border-secondary-100">
                 <CardTitle className="flex items-center text-charcoal-800 font-heading">
                   <Package className="w-5 h-5 mr-2 text-primary-500" />
                   Контактная информация
@@ -552,7 +552,7 @@ const CheckoutPage = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <Card className="border-secondary-100 shadow-lg premium-shadow rounded-2xl overflow-hidden sticky top-8">
-              <CardHeader className="bg-gradient-to-r from-cream-50 to-white border-b border-secondary-100">
+              <CardHeader className="bg-white border-b border-secondary-100">
                 <CardTitle className="text-charcoal-800 font-heading">Ваш заказ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5 pt-6">
@@ -627,22 +627,6 @@ const CheckoutPage = () => {
                     <span className="text-charcoal-600">Товары</span>
                     <span className="text-charcoal-800 font-medium">{formatPrice(totalPrice)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-charcoal-600">Доставка</span>
-                    <span className={`font-medium ${deliveryFee === 0 ? 'text-green-600' : 'text-charcoal-800'}`}>
-                      {deliveryFee === 0 ? 'Бесплатно' : formatPrice(deliveryFee)}
-                    </span>
-                  </div>
-                  {deliveryFee > 0 && (
-                    <div className="bg-cream-50 rounded-xl p-3 border border-secondary-100">
-                      <p className="text-sm text-charcoal-600 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-primary-500" viewBox="0 0 20 20" fill="currentColor">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                        </svg>
-                        Бесплатная доставка при заказе от 5000 ₽
-                      </p>
-                    </div>
-                  )}
                 </div>
                 
                 <Separator className="bg-secondary-100" />

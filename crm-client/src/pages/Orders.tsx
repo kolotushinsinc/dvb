@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Search,
-  Filter,
   CheckCircle,
   Clock,
   TruckIcon,
@@ -50,19 +49,40 @@ export const Orders = () => {
 
   const { data: ordersData, isLoading } = useQuery({
     queryKey: ['orders', page, selectedStatus],
-    queryFn: () => ordersApi.getAll({
+    queryFn: () => ordersApi.getAllForCRM({
       page,
       limit: 10,
-      status: selectedStatus,
+      ...(selectedStatus && { status: selectedStatus }),
     }),
     placeholderData: (previousData) => previousData,
   });
+
+  // Fetch all orders for statistics (without pagination)
+  const { data: allOrdersData } = useQuery({
+    queryKey: ['orders-stats'],
+    queryFn: () => ordersApi.getAllForCRM({
+      page: 1,
+      limit: 1000, // Get all orders for stats
+    }),
+  });
+
+  // Calculate statistics from all orders
+  const stats = {
+    total: allOrdersData?.total || 0,
+    pending: allOrdersData?.orders?.filter((o: Order) => o.status === 'PENDING').length || 0,
+    confirmed: allOrdersData?.orders?.filter((o: Order) => o.status === 'CONFIRMED').length || 0,
+    processing: allOrdersData?.orders?.filter((o: Order) => o.status === 'PROCESSING').length || 0,
+    shipped: allOrdersData?.orders?.filter((o: Order) => o.status === 'SHIPPED').length || 0,
+    delivered: allOrdersData?.orders?.filter((o: Order) => o.status === 'DELIVERED').length || 0,
+  };
+
 
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: Order['status'] }) =>
       ordersApi.updateStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['orders-stats'] });
       toast.success('Статус заказа обновлен');
     },
     onError: () => {
@@ -100,13 +120,14 @@ export const Orders = () => {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         {[
-          { label: 'Всего', value: ordersData?.total?.toString() || '0', color: 'from-slate-600 to-slate-700' },
-          { label: 'Ожидание', value: '0', color: 'from-amber-500 to-amber-600' },
-          { label: 'Обработка', value: '0', color: 'from-blue-500 to-blue-600' },
-          { label: 'Отправлено', value: '0', color: 'from-purple-500 to-purple-600' },
-          { label: 'Доставлено', value: '0', color: 'from-emerald-500 to-emerald-600' },
+          { label: 'Всего', value: stats.total.toString(), color: 'from-slate-600 to-slate-700' },
+          { label: 'Ожидание', value: stats.pending.toString(), color: 'from-amber-500 to-amber-600' },
+          { label: 'Подтверждено', value: stats.confirmed.toString(), color: 'from-green-500 to-green-600' },
+          { label: 'Обработка', value: stats.processing.toString(), color: 'from-blue-500 to-blue-600' },
+          { label: 'Отправлено', value: stats.shipped.toString(), color: 'from-purple-500 to-purple-600' },
+          { label: 'Доставлено', value: stats.delivered.toString(), color: 'from-emerald-500 to-emerald-600' },
         ].map((stat) => (
           <div key={stat.label} className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
             <p className="text-sm text-slate-600 mb-1">{stat.label}</p>
@@ -142,11 +163,6 @@ export const Orders = () => {
                 </option>
               ))}
             </select>
-
-            <Button variant="outline" className="px-6 py-3 border border-slate-300 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors">
-              <Filter className="w-5 h-5 mr-2" />
-              Фильтры
-            </Button>
           </div>
         </div>
 

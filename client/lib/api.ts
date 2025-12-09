@@ -461,7 +461,11 @@ export type Order = {
     country: string;
   };
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-  total: number;
+  total?: number; // Legacy field for backward compatibility
+  totalAmount: number; // Actual field from server
+  shippingCost?: number;
+  taxAmount?: number;
+  discountAmount?: number;
   createdAt: string;
   updatedAt: string;
 };

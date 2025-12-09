@@ -343,4 +343,42 @@ export const settingsApi = {
   },
 };
 
+export const sliderApi = {
+  get: async (): Promise<{ slides: any[] }> => {
+    const response = await api.get('/slider');
+    return response.data.data || response.data;
+  },
+  
+  getAdmin: async (): Promise<{ slides: any[] }> => {
+    const response = await api.get('/slider/admin');
+    return response.data.data || response.data;
+  },
+  
+  add: async (data: any): Promise<any> => {
+    const response = await api.post('/slider', data);
+    return response.data.data || response.data;
+  },
+  
+  update: async (id: string, data: any): Promise<any> => {
+    const response = await api.put(`/slider/${id}`, data);
+    return response.data.data || response.data;
+  },
+  
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/slider/${id}`);
+  },
+  
+  uploadImage: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    const response = await api.post('/slider/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data.data?.url || response.data.url;
+  },
+};
+
 export default api;

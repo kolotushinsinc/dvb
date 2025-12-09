@@ -144,7 +144,7 @@ export const Dashboard = () => {
         />
         <StatCard
           title="Товары"
-          value={stats.totalProducts.toString()}
+          value={(stats.totalProducts || 0).toString()}
           icon={Package}
           trend="down"
           trendValue="-2.4%"

@@ -98,7 +98,7 @@ const LoginPage = () => {
         </div>
 
         <Card className="border-none shadow-xl premium-shadow rounded-2xl overflow-hidden bg-white">
-          <CardHeader className="bg-gradient-to-r from-cream-50 to-white border-b border-secondary-100 pb-6">
+          <CardHeader className="bg-white border-b border-secondary-100 pb-6">
             <CardTitle className="text-charcoal-800 text-2xl font-display">Вход</CardTitle>
             <CardDescription className="text-charcoal-600 mt-2">
               Используйте email и пароль для входа в систему

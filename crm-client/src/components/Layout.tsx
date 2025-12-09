@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -11,12 +11,15 @@ import {
   Menu,
   X,
   UserCog,
-  Star
+  Star,
+  MessageCircle,
+  Image
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
+import api from '@/lib/api';
 
 const navigation = [
   { name: 'Дашборд', href: '/dashboard', icon: LayoutDashboard },
@@ -26,6 +29,8 @@ const navigation = [
   { name: 'Клиенты', href: '/customers', icon: Users },
   { name: 'Менеджеры', href: '/managers', icon: UserCog },
   { name: 'Отзывы', href: '/reviews', icon: Star },
+  { name: 'Чат-поддержка', href: '/chats', icon: MessageCircle },
+  { name: 'Слайдер', href: '/slider', icon: Image },
   { name: 'Настройки', href: '/settings', icon: Settings },
 ];
 
@@ -36,8 +41,30 @@ interface LayoutProps {
 export const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const { logout } = useAuth();
   const location = useLocation();
+
+  // Load unread messages count
+  useEffect(() => {
+    const loadUnreadCount = async () => {
+      try {
+        const response = await api.get('/chat/admin/unread-count');
+        if (response.data?.unreadCount !== undefined) {
+          setUnreadCount(response.data.unreadCount);
+        }
+      } catch (error) {
+        console.error('Failed to load unread count:', error);
+      }
+    };
+
+    loadUnreadCount();
+    
+    // Poll for updates every 5 seconds
+    const interval = setInterval(loadUnreadCount, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -67,7 +94,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   key={item.name}
                   to={item.href}
                   className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+                    'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative',
                     location.pathname === item.href
                       ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30'
                       : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
@@ -75,7 +102,14 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onClick={() => setSidebarOpen(false)}
                 >
                   <Icon className="w-5 h-5" />
-                  <span className="font-medium">{item.name}</span>
+                  <span className="font-medium inline-flex items-center">
+                    {item.name}
+                    {item.href === '/chats' && unreadCount > 0 && (
+                      <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </span>
                 </Link>
               );
             })}
@@ -112,14 +146,21 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
                 key={item.name}
                 to={item.href}
                 className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
+                  'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative',
                   location.pathname === item.href
                     ? 'bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/30'
                     : 'text-slate-300 hover:bg-slate-800/50 hover:text-white'
                 )}
               >
                 <Icon className="w-5 h-5" />
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium inline-flex items-center">
+                  {item.name}
+                  {item.href === '/chats' && unreadCount > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </span>
               </Link>
             );
           })}

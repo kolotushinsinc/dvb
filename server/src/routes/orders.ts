@@ -130,13 +130,14 @@ router.post('/', [
   body('items.*.productId').isString().notEmpty(),
   body('items.*.quantity').isInt({ min: 1 }),
   body('items.*.price').isFloat({ min: 0 }),
-  body('items.*.size').optional().isString(),
-  body('items.*.color').optional().isString(),
+  body('items.*.size').optional({ nullable: true }).isString(),
+  body('items.*.color').optional({ nullable: true }).isString(),
   body('shippingAddress').isObject(),
   body('shippingAddress.firstName').notEmpty(),
   body('shippingAddress.lastName').notEmpty(),
   body('shippingAddress.address').notEmpty(),
   body('shippingAddress.city').notEmpty(),
+  body('shippingAddress.state').optional().isString(),
   body('shippingAddress.zip').notEmpty(),
   body('shippingAddress.country').notEmpty(),
   body('customerEmail').isEmail(),
@@ -238,6 +239,55 @@ router.post('/', [
       success: true,
       message: 'Order created successfully',
       data: { order: formattedOrder }
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Update order status
+router.put('/:id/status', [
+  body('status').isIn(['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'REFUNDED']),
+], auth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        error: 'Validation failed',
+        details: errors.array()
+      });
+    }
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        error: 'Order not found'
+      });
+    }
+
+    order.status = status;
+    await order.save();
+
+    const updatedOrder = await Order.findById(id)
+      .populate({
+        path: 'items.productId',
+        populate: {
+          path: 'categoryId',
+          select: 'name slug'
+        }
+      })
+      .lean();
+
+    res.json({
+      success: true,
+      message: 'Order status updated successfully',
+      data: { order: updatedOrder }
     });
   } catch (error) {
     next(error);

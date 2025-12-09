@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест желтого фона - Автозаполнение</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #1F2933;
+            margin-bottom: 20px;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .test-section h2 {
+            color: #FF8800;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .card {
+            background: #FFFFFF;
+            border: 1px solid #E4E7EB;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .product-card {
+            background: #FFFFFF;
+            border: 1px solid #E4E7EB;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(255, 136, 0, 0.12);
+        }
+
+        /* Тест 1: Без исправления автозаполнения */
+        .test-without-fix input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #CBD2D9;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Тест 2: С исправлением автозаполнения */
+        .test-with-fix input:-webkit-autofill,
+        .test-with-fix input:-webkit-autofill:hover,
+        .test-with-fix input:-webkit-autofill:focus,
+        .test-with-fix input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px white inset !important;
+            box-shadow: 0 0 0 1000px white inset !important;
+            -webkit-text-fill-color: #1F2933 !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        .test-with-fix input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #CBD2D9;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: white;
+        }
+
+        /* Тест 3: Карточки с явным фоном */
+        .test-explicit-bg .product-card {
+            background-color: #FFFFFF !important;
+            background-image: none !important;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .status-ok {
+            background-color: #10B981;
+            color: white;
+        }
+
+        .status-warning {
+            background-color: #F59E0B;
+            color: white;
+        }
+
+        .status-error {
+            background-color: #EF4444;
+            color: white;
+        }
+
+        .instructions {
+            background-color: #FFF9E6;
+            border-left: 4px solid #FF8800;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .instructions h3 {
+            color: #FF8800;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #FFD091 0%, #FFA02B 100%);
+            color: #331B00;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #FFE0B3 0%, #FFB85E 100%);
+            transform: translateY(-2px);
+        }
+
+        .console-output {
+            background-color: #1F2933;
+            color: #00FF00;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Тест проблемы с желтым фоном</h1>
+
+        <div class="instructions">
+            <h3>Инструкции по тестированию:</h3>
+            <ol>
+                <li>Заполните формы ниже и сохраните данные в браузере (автозаполнение)</li>
+                <li>Перезагрузите страницу (F5)</li>
+                <li>Браузер автоматически заполнит поля</li>
+                <li>Сравните поведение в разных секциях</li>
+                <li>Проверьте, появляется ли желтый фон</li>
+            </ol>
+        </div>
+
+        <!-- Тест 1: БЕЗ исправления -->
+        <div class="test-section test-without-fix">
+            <h2>❌ Тест 1: БЕЗ исправления автозаполнения</h2>
+            <span class="status status-error">Проблема должна проявиться</span>
+            
+            <div class="card">
+                <h3>Форма входа (без исправления)</h3>
+                <form autocomplete="on">
+                    <input type="email" name="email1" placeholder="Email" autocomplete="email">
+                    <input type="password" name="password1" placeholder="Пароль" autocomplete="current-password">
+                    <input type="text" name="name1" placeholder="Имя" autocomplete="name">
+                </form>
+            </div>
+
+            <div class="product-card">
+                <h3>Карточка товара (без исправления)</h3>
+                <p>Эта карточка может получить желтый фон из-за автозаполнения полей выше.</p>
+                <p><strong>Цена:</strong> 2 990 ₽</p>
+            </div>
+        </div>
+
+        <!-- Тест 2: С исправлением -->
+        <div class="test-section test-with-fix">
+            <h2>✅ Тест 2: С исправлением автозаполнения</h2>
+            <span class="status status-ok">Проблема должна быть устранена</span>
+            
+            <div class="card">
+                <h3>Форма входа (с исправлением)</h3>
+                <form autocomplete="on">
+                    <input type="email" name="email2" placeholder="Email" autocomplete="email">
+                    <input type="password" name="password2" placeholder="Пароль" autocomplete="current-password">
+                    <input type="text" name="name2" placeholder="Имя" autocomplete="name">
+                </form>
+            </div>
+
+            <div class="product-card">
+                <h3>Карточка товара (с исправлением)</h3>
+                <p>Эта карточка должна оставаться белой, даже при автозаполнении.</p>
+                <p><strong>Цена:</strong> 2 990 ₽</p>
+            </div>
+        </div>
+
+        <!-- Тест 3: Явный фон -->
+        <div class="test-section test-explicit-bg">
+            <h2>✅ Тест 3: Явное указание фона</h2>
+            <span class="status status-ok">Дополнительная защита</span>
+            
+            <div class="product-card">
+                <h3>Карточка с явным фоном</h3>
+                <p>Эта карточка имеет явно указанный белый фон через !important.</p>
+                <p><strong>Цена:</strong> 2 990 ₽</p>
+            </div>
+        </div>
+
+        <!-- Диагностические инструменты -->
+        <div class="test-section">
+            <h2>🔧 Диагностические инструменты</h2>
+            
+            <button onclick="checkAutofill()">Проверить автозаполненные поля</button>
+            <button onclick="checkYellowElements()">Найти элементы с желтым фоном</button>
+            <button onclick="checkCSSVariables()">Проверить CSS-переменные</button>
+            <button onclick="clearConsole()">Очистить консоль</button>
+            
+            <div class="console-output" id="console">
+                <div>Консоль готова к работе...</div>
+            </div>
+        </div>
+
+        <!-- Информация о браузере -->
+        <div class="test-section">
+            <h2>ℹ️ Информация о браузере</h2>
+            <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+            <p><strong>Браузер:</strong> <span id="browser"></span></p>
+            <p><strong>Разрешение:</strong> <span id="resolution"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Вывод в консоль на странице
+        function log(message, type = 'info') {
+            const console = document.getElementById('console');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#FF4444' : type === 'success' ? '#00FF00' : '#00FFFF';
+            console.innerHTML += `<div style="color: ${color}">[${timestamp}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console').innerHTML = '<div>Консоль очищена...</div>';
+        }
+
+        // Проверка автозаполненных полей
+        function checkAutofill() {
+            log('Проверка автозаполненных полей...', 'info');
+            const autofilled = document.querySelectorAll('input:-webkit-autofill');
+            
+            if (autofilled.length === 0) {
+                log('❌ Автозаполненные поля не найдены', 'error');
+                log('Совет: Заполните формы и перезагрузите страницу', 'info');
+            } else {
+                log(`✅ Найдено ${autofilled.length} автозаполненных полей:`, 'success');
+                autofilled.forEach((el, i) => {
+                    const styles = window.getComputedStyle(el);
+                    log(`  ${i + 1}. ${el.name || el.placeholder} - bg: ${styles.backgroundColor}`, 'info');
+                });
+            }
+        }
+
+        // Поиск элементов с желтым фоном
+        function checkYellowElements() {
+            log('Поиск элементов с желтым фоном...', 'info');
+            const allElements = document.querySelectorAll('*');
+            const yellowElements = [];
+            
+            allElements.forEach(el => {
+                const bg = window.getComputedStyle(el).backgroundColor;
+                // Проверка на желтый цвет (различные оттенки)
+                if (bg.includes('255, 255') || bg.includes('yellow') || 
+                    bg.match(/rgb\(25[0-5], 25[0-5]/) || bg.match(/rgb\(255, 2[0-5][0-9]/)) {
+                    yellowElements.push({
+                        element: el,
+                        bg: bg,
+                        class: el.className
+                    });
+                }
+            });
+            
+            if (yellowElements.length === 0) {
+                log('✅ Элементы с желтым фоном не найдены', 'success');
+            } else {
+                log(`⚠️ Найдено ${yellowElements.length} элементов с желтым фоном:`, 'error');
+                yellowElements.forEach((item, i) => {
+                    log(`  ${i + 1}. ${item.element.tagName}.${item.class} - ${item.bg}`, 'info');
+                });
+            }
+        }
+
+        // Проверка CSS-переменных
+        function checkCSSVariables() {
+            log('Проверка CSS-переменных...', 'info');
+            const styles = getComputedStyle(document.documentElement);
+            const variables = [
+                '--primary',
+                '--background',
+                '--foreground',
+                '--card',
+                '--accent'
+            ];
+            
+            variables.forEach(varName => {
+                const value = styles.getPropertyValue(varName);
+                log(`  ${varName}: ${value || 'не установлена'}`, 'info');
+            });
+        }
+
+        // Определение браузера
+        function detectBrowser() {
+            const ua = navigator.userAgent;
+            let browser = 'Unknown';
+            
+            if (ua.includes('Chrome') && !ua.includes('Edg')) browser = 'Chrome';
+            else if (ua.includes('Firefox')) browser = 'Firefox';
+            else if (ua.includes('Safari') && !ua.includes('Chrome')) browser = 'Safari';
+            else if (ua.includes('Edg')) browser = 'Edge';
+            
+            return browser;
+        }
+
+        // Инициализация информации о браузере
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('browser').textContent = detectBrowser();
+        document.getElementById('resolution').textContent = `${window.innerWidth}x${window.innerHeight}`;
+
+        // Автоматическая проверка при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('Страница загружена. Выполняется автоматическая проверка...', 'info');
+                checkAutofill();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

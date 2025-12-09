@@ -20,6 +20,8 @@ import uploadRoutes from './routes/upload';
 import adminRoutes from './routes/admin';
 import adminReviewRoutes from './routes/admin-reviews';
 import settingsRoutes from './routes/settings';
+import chatRoutes from './routes/chat';
+import sliderRoutes from './routes/slider';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler';
@@ -133,6 +135,8 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/admin/reviews', adminReviewRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/slider', sliderRoutes);
 
 // Error handling middleware
 app.use(notFound);
