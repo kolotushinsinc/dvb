@@ -249,11 +249,6 @@ export const Categories = () => {
                   </span>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-slate-200">
-                  <button className="w-full py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 transition-colors">
-                    Просмотреть товары
-                  </button>
-                </div>
               </div>
             </div>
           );

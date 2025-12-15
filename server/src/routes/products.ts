@@ -91,8 +91,18 @@ router.get('/', [
     };
 
     if (category) {
-      // Find category by slug first
-      const categoryDoc = await Category.findOne({ slug: category });
+      // Check if category is a MongoDB ObjectId (24 hex characters)
+      const isObjectId = /^[0-9a-fA-F]{24}$/.test(category as string);
+      
+      let categoryDoc;
+      if (isObjectId) {
+        // If it's an ObjectId, find by _id
+        categoryDoc = await Category.findById(category);
+      } else {
+        // Otherwise, find by slug
+        categoryDoc = await Category.findOne({ slug: category });
+      }
+      
       if (categoryDoc) {
         where.categoryId = categoryDoc._id;
       } else {

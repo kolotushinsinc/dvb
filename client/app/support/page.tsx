@@ -46,20 +46,31 @@ const SupportPage = () => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Автоматическая прокрутка вниз при новых сообщениях
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   };
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
+  // Фокус на поле ввода при загрузке страницы и после отправки/получения сообщений
+  useEffect(() => {
+    if (!loading && isAuthenticated) {
+      // Используем setTimeout чтобы фокус применился после прокрутки
+      setTimeout(() => {
+        inputRef.current?.focus({ preventScroll: true });
+      }, 100);
+    }
+  }, [loading, isAuthenticated, messages]);
+
   // Загрузка чата
   const loadChat = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru';
       const token = localStorage.getItem('authToken');
       const response = await fetch(`${apiUrl}/api/chat/my-chat`, {
         headers: {
@@ -90,7 +101,7 @@ const SupportPage = () => {
   // Пометить сообщения как прочитанные
   const markAsRead = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru';
       const token = localStorage.getItem('authToken');
       await fetch(`${apiUrl}/api/chat/my-chat/mark-read`, {
         method: 'POST',
@@ -106,7 +117,7 @@ const SupportPage = () => {
   // Long polling для получения новых сообщений
   const pollMessages = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru';
       const token = localStorage.getItem('authToken');
       const lastMessageId = messages.length > 0 ? messages[messages.length - 1]._id : '';
       const response = await fetch(
@@ -157,7 +168,7 @@ const SupportPage = () => {
     setMessages(prev => [...prev, optimisticMessage]);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru';
       const token = localStorage.getItem('authToken');
       const response = await fetch(`${apiUrl}/api/chat/my-chat/messages`, {
         method: 'POST',
@@ -239,10 +250,10 @@ const SupportPage = () => {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-gray-600">Загрузка чата...</p>
+          <p className="mt-4 text-muted-foreground">Загрузка чата...</p>
         </div>
       </div>
     );
@@ -250,10 +261,10 @@ const SupportPage = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Необходимо войти в систему</h1>
-          <p className="mb-6">Для доступа к поддержке необходимо авторизоваться</p>
+          <h1 className="text-2xl font-bold mb-4 text-foreground">Необходимо войти в систему</h1>
+          <p className="mb-6 text-muted-foreground">Для доступа к поддержке необходимо авторизоваться</p>
           <Link href="/auth/login">
             <Button>Войти</Button>
           </Link>
@@ -263,7 +274,7 @@ const SupportPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
       <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
@@ -276,9 +287,9 @@ const SupportPage = () => {
           </p>
         </div>
 
-        <Card className="h-[600px] flex flex-col">
-          <CardHeader className="border-b">
-            <CardTitle className="flex items-center gap-2">
+        <Card className="h-[600px] flex flex-col shadow-lg">
+          <CardHeader className="border-b bg-gradient-to-r from-secondary to-secondary/90">
+            <CardTitle className="flex items-center gap-2 text-white">
               <MessageCircle className="h-5 w-5" />
               Чат с администрацией
             </CardTitle>
@@ -289,11 +300,11 @@ const SupportPage = () => {
             <div className="flex-1 overflow-y-auto p-4" ref={scrollAreaRef}>
               {messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center py-12">
-                  <MessageCircle className="h-16 w-16 text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  <MessageCircle className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                  <h3 className="text-lg font-medium text-foreground mb-2">
                     Начните разговор
                   </h3>
-                  <p className="text-gray-500 max-w-sm">
+                  <p className="text-muted-foreground max-w-sm">
                     Отправьте сообщение, и наша команда поддержки ответит вам в ближайшее время
                   </p>
                 </div>
@@ -319,23 +330,23 @@ const SupportPage = () => {
                           }`}
                         >
                           <div
-                            className={`max-w-[70%] rounded-lg px-4 py-2 ${
+                            className={`max-w-[70%] rounded-lg px-4 py-2 shadow-sm ${
                               message.senderType === 'CLIENT'
-                                ? 'bg-primary text-white'
-                                : 'bg-gray-100 text-gray-900'
+                                ? 'bg-secondary text-white'
+                                : 'bg-white border border-border text-foreground'
                             }`}
                           >
                             {message.senderType === 'ADMIN' && (
-                              <p className="text-xs font-medium mb-1 opacity-70">
+                              <p className="text-xs font-semibold mb-1 text-primary">
                                 Администрация
                               </p>
                             )}
-                            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                            <p className="whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                             <p
-                              className={`text-xs mt-1 ${
+                              className={`text-xs mt-1.5 ${
                                 message.senderType === 'CLIENT'
-                                  ? 'text-white/70'
-                                  : 'text-gray-500'
+                                  ? 'text-white/60'
+                                  : 'text-muted-foreground'
                               }`}
                             >
                               {formatTime(message.createdAt)}
@@ -360,6 +371,7 @@ const SupportPage = () => {
                 className="flex gap-2"
               >
                 <Input
+                  ref={inputRef}
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Введите сообщение..."

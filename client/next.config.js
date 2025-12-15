@@ -2,12 +2,14 @@
 const nextConfig = {
   // Remove output: 'export' to allow dynamic routes
   // output: 'export',
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     unoptimized: true,
-    domains: ['api.dvberry.ru'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'api.dvberry.ru',
+      },
+    ],
   },
   // Add trailing slash for consistent routing
   trailingSlash: false,
@@ -16,16 +18,12 @@ const nextConfig = {
     return [
       {
         source: '/uploads/:path*',
-        destination: 'http://localhost:5001/uploads/:path*',
+        destination: 'https://api.dvberry.ru/uploads/:path*',
       },
     ];
   },
-  // Experimental features to improve build
-  experimental: {
-    serverComponentsExternalPackages: [],
-    // Disable server actions to prevent infinite requests
-    serverActions: false,
-  },
+  // External packages for server components
+  serverExternalPackages: [],
   // Disable source maps in production to reduce build size
   productionBrowserSourceMaps: false,
   // Disable React strict mode to prevent double rendering

@@ -5,9 +5,23 @@ import { ClientProviders } from '@/components/ClientProviders';
 import PageTransitionLoader from '@/components/ui/PageTransitionLoader';
 import SmoothTransition from '@/components/ui/SmoothTransition';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-const raleway = Raleway({ subsets: ['latin'], variable: '--font-raleway' });
-const montserrat = Montserrat({ subsets: ['latin'], variable: '--font-montserrat' });
+const inter = Inter({ 
+  subsets: ['latin', 'cyrillic'], 
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const raleway = Raleway({ 
+  subsets: ['latin', 'cyrillic'], 
+  variable: '--font-raleway',
+  display: 'swap',
+});
+
+const montserrat = Montserrat({ 
+  subsets: ['latin', 'cyrillic'], 
+  variable: '--font-montserrat',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'DV BERRY - Стильные очки и модная одежда',

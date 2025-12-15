@@ -112,7 +112,7 @@ const ProfilePage = () => {
 
         // Get unread messages count
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru';
           const token = localStorage.getItem('authToken');
           const response = await fetch(`${apiUrl}/api/chat/my-chat`, {
             headers: {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { History, Filter, Calendar, User, FileText } from 'lucide-react';
+import { History, Filter, Calendar, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

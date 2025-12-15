@@ -1,6 +1,6 @@
 import { Product } from '@/types/product';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru/api';
 
 async function fetchApi(endpoint: string, options?: RequestInit) {
   // Add retry logic for failed requests

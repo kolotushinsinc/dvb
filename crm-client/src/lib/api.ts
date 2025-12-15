@@ -2,7 +2,7 @@ import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'ax
 import { User, Product, Category, Order, DashboardStats } from '@/types';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://api.dvberry.ru/api',
   timeout: 10000,
 });
 
@@ -53,7 +53,29 @@ export const productsApi = {
     category?: string;
     search?: string;
   }): Promise<{ products: Product[]; total: number; pagination?: any }> => {
-    const response = await api.get('/products', { params });
+    // Создаем копию параметров для модификации
+    const queryParams = { ...params };
+    
+    // Если передана категория, нужно отправить её как categoryId (ID категории)
+    // а не как slug, так как сервер ожидает либо slug в параметре category, либо ID в categoryId
+    // Но в CRM мы передаем ID категории, поэтому переименуем параметр
+    if (queryParams.category) {
+      // Проверяем, является ли это MongoDB ObjectId (24 hex символа)
+      if (queryParams.category.match(/^[0-9a-fA-F]{24}$/)) {
+        // Это ID категории, оставляем как есть - сервер обработает
+        // На сервере в products.ts есть логика:
+        // if (category) {
+        //   const categoryDoc = await Category.findOne({ slug: category });
+        //   if (categoryDoc) {
+        //     where.categoryId = categoryDoc._id;
+        //   }
+        // }
+        // Но это работает только для slug. Для ID нужно искать по _id
+        // Поэтому мы не меняем параметр, но сервер должен обрабатывать и ID
+      }
+    }
+    
+    const response = await api.get('/products', { params: queryParams });
     const data = response.data.data || response.data;
     // Transform the response to ensure category is properly mapped
     const products = data.products?.map((product: any) => ({

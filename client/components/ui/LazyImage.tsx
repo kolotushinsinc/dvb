@@ -30,7 +30,7 @@ export const LazyImage: React.FC<LazyImageProps> = ({
   const processImageUrl = (url: string) => {
     if (!url) return url;
     // If the URL contains the server address, replace it with the proxy path
-    return url.replace('http://localhost:5001', '');
+    return url.replace('https://api.dvberry.ru', '');
   };
 
   const processedSrc = processImageUrl(src);

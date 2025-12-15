@@ -1,4 +1,23 @@
 {
-  "/not-found": "app/not-found.js",
-  "/support/page": "app/support/page.js"
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/about/page": "app/about/page.js",
+  "/auth/login/page": "app/auth/login/page.js",
+  "/auth/register/page": "app/auth/register/page.js",
+  "/cart/page": "app/cart/page.js",
+  "/catalog/[category]/page": "app/catalog/[category]/page.js",
+  "/catalog/new/page": "app/catalog/new/page.js",
+  "/catalog/page": "app/catalog/page.js",
+  "/checkout/page": "app/checkout/page.js",
+  "/contacts/page": "app/contacts/page.js",
+  "/faq/page": "app/faq/page.js",
+  "/favorites/page": "app/favorites/page.js",
+  "/order-confirmation/[id]/page": "app/order-confirmation/[id]/page.js",
+  "/page": "app/page.js",
+  "/privacy/page": "app/privacy/page.js",
+  "/product/[slug]/page": "app/product/[slug]/page.js",
+  "/profile/page": "app/profile/page.js",
+  "/sale/page": "app/sale/page.js",
+  "/support/page": "app/support/page.js",
+  "/terms/page": "app/terms/page.js"
 }

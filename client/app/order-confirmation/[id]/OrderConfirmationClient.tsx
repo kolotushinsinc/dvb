@@ -249,7 +249,7 @@ const OrderConfirmationClient = ({ orderId }: OrderConfirmationClientProps) => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Товары</span>
-                    <span>{formatPrice(order.total)}</span>
+                    <span>{formatPrice(order.totalAmount || order.total || 0)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Доставка</span>
@@ -261,7 +261,7 @@ const OrderConfirmationClient = ({ orderId }: OrderConfirmationClientProps) => {
                 
                 <div className="flex justify-between font-bold text-lg">
                   <span>Итого</span>
-                  <span>{formatPrice(order.total)}</span>
+                  <span>{formatPrice(order.totalAmount || order.total || 0)}</span>
                 </div>
                 
                 <div className="pt-6 space-y-3">

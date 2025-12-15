@@ -35,8 +35,13 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
   initialCategory
 }) => {
   const [showFilters, setShowFilters] = useState(false);
+  
+  // Вычисляем минимальную и максимальную цену из товаров с запасом
+  const minPrice = products.length > 0 ? Math.max(0, Math.floor(Math.min(...products.map(p => p.price)) - 500)) : 0;
+  const maxPrice = products.length > 0 ? Math.ceil(Math.max(...products.map(p => p.price)) + 500) : 15000;
+  
   const [filterState, setFilterState] = useState<FilterState>({
-    priceRange: [0, 15000],
+    priceRange: [minPrice, maxPrice],
     selectedCategories: initialCategory ? [initialCategory] : [],
     selectedFilters: {},
     selectedCountries: [],
@@ -491,7 +496,7 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
 
   const clearFilters = () => {
     setFilterState({
-      priceRange: [0, 15000],
+      priceRange: [minPrice, maxPrice],
       selectedCategories: initialCategory ? [initialCategory] : [],
       selectedFilters: {},
       selectedCountries: [],
@@ -623,7 +628,8 @@ export const UniversalFilters: React.FC<UniversalFiltersProps> = ({
           <Slider
             value={filterState.priceRange}
             onValueChange={(value) => setFilterState(prev => ({ ...prev, priceRange: value as [number, number] }))}
-            max={15000}
+            min={minPrice}
+            max={maxPrice}
             step={100}
             className="w-full"
           />

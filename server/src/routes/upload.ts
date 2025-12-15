@@ -106,8 +106,8 @@ router.post('/image', adminAuth, upload.single('image'), async (req: Request, re
     // Compress image and create thumbnail
     const compressionResult = await compressImage(originalPath, compressedPath, thumbnailPath);
 
-    const fileUrl = `http://localhost:5001/uploads/${compressionResult.filename}`;
-    const thumbnailUrl = `http://localhost:5001/uploads/thumbnails/${compressionResult.thumbnailFilename}`;
+    const fileUrl = `https://api.dvberry.ru/uploads/${compressionResult.filename}`;
+    const thumbnailUrl = `https://api.dvberry.ru/uploads/thumbnails/${compressionResult.thumbnailFilename}`;
 
     res.json({
       success: true,
@@ -159,8 +159,8 @@ router.post('/images', adminAuth, upload.array('images', 10), async (req: Reques
         thumbnailFilename: compressionResult.thumbnailFilename,
         originalName: file.originalname,
         size: file.size,
-        url: `http://localhost:5001/uploads/${compressionResult.filename}`,
-        thumbnailUrl: `http://localhost:5001/uploads/thumbnails/${compressionResult.thumbnailFilename}`
+        url: `https://api.dvberry.ru/uploads/${compressionResult.filename}`,
+        thumbnailUrl: `https://api.dvberry.ru/uploads/thumbnails/${compressionResult.thumbnailFilename}`
       };
     }));
 

@@ -43,7 +43,7 @@ export default function HeroSection() {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api'}/slider`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.dvberry.ru/api'}/slider`);
         const data = await response.json();
         console.log('Slider data from API:', data);
         if (data.success && data.data?.slides && data.data.slides.length > 0) {

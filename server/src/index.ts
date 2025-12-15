@@ -71,7 +71,7 @@ app.use('/api', limiter);
 app.use((req, res, next) => {
   const allowedOrigins = [
     process.env.CLIENT_URL || 'http://localhost:3000',
-    'http://localhost:3001', // CRM client
+    'http://localhost:3001', 'https://api.dvberry.ru', 'https://crm.dvberry.ru', 'https://dvberry.ru', // CRM client
   ];
   
   const origin = req.headers.origin;

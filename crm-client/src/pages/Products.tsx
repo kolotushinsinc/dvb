@@ -5,7 +5,6 @@ import {
   Search,
   Edit,
   Trash2,
-  Filter,
   Package,
   X,
   Eye,
@@ -124,10 +123,10 @@ export const Products = () => {
     queryFn: () => productsApi.getAll({
       page,
       limit: 10,
-      category: selectedCategory,
-      search,
+      category: selectedCategory || undefined,
+      search: search || undefined,
     }),
-    placeholderData: (previousData) => previousData,
+    // Убираем placeholderData, чтобы данные обновлялись при смене категории
   });
 
   const { data: categoriesData } = useQuery({
@@ -518,11 +517,6 @@ export const Products = () => {
               </option>
             ))}
           </select>
-
-          <Button variant="outline" className="px-6 py-3 border border-slate-300 text-slate-700 font-medium rounded-xl hover:bg-slate-50 transition-colors">
-            <Filter className="w-5 h-5 mr-2" />
-            Фильтры
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">

@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Star, Edit, Trash2, Search, Plus, User } from 'lucide-react';
+import { Star, Trash2, Search, Plus, User } from 'lucide-react';
 import api from '@/lib/api';
 
 interface FictionalAuthor {
